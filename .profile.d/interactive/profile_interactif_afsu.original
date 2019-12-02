@@ -1,0 +1,65 @@
+#!/bin/bash
+
+#########################################################################################################
+# Afin d'eviter l'anarchie dans ce profile, chaque ligne (ou bloc) de code doit avoir une justification #
+#########################################################################################################
+
+# Permet de pouvoir executer le .profile plus d'une fois afin de recharger l'environnement
+# unset SETUP_DONE
+
+# Les nouveaux fichiers auront un mode 644/755
+umask 022
+
+
+# Ajouter le path des utilitaires GNU sur AIX
+if [ `uname` = "AIX"  ]; then
+   if [[ -d /fs/aqb/m1/afsu/dev/usr ]]; then
+      export PATH=/fs/aqb/m1/afsu/dev/usr/bin:${PATH}
+      export MANPATH=/fs/aqb/m1/afsu/dev/usr/share/man:${MANPATH}
+
+      # Maintenant que l'on a affaire à un gentil ls on peut lui dire que le monde n'est pas uniquement noir ou blanc
+      alias ls='ls --color=auto'
+   fi
+fi
+
+# Editeur terminal par defaut
+export EDITOR=vim
+
+# Pager par defaut (ce vers quoi les commandes comme "man" envoie leur sortie)
+export PAGER=less
+
+# Amelioration de l'historique
+export history=100
+export savehist=100
+export HISTCONTROL=ignoredups
+
+# Quelques definitions de code clavier
+export INPUTRC=/home/afsu/dev/.inputrc
+set -o emacs
+
+# Ajout des binaires du groupes dans le PATH
+export PATH=/users/dor/afsu/dev/bin:/users/dor/afsu/dev/bin/${ARCH}:${PATH}
+
+# Fait en sorte qu'un EOF (lire ctrl+D) tue un terminal
+unset IGNOREEOF
+
+# Permet au "backspace" de faire un ... "backspace"
+if tty -s ; then
+   stty erase '^?' 2>/dev/null
+fi
+
+# Rend le rm moins mechant en demandant confirmation
+alias rm='rm -i'
+
+# Editeur par defaut pour les logs de SVN
+export SVN_EDITOR=vim
+
+export SVN_REPOS=https://ulysse.cmc.ec.gc.ca/svn
+
+# On grimpe les limites; necessaire pour certaines runs
+# ulimit -t unlimited &>/dev/null
+# ulimit -d unlimited &>/dev/null
+# ulimit -s unlimited &>/dev/null
+# ulimit -m unlimited &>/dev/null
+# ulimit -a 
+

@@ -1,0 +1,218 @@
+#!/bin/bash
+#- Efface une entree dans le PATH
+function cleanpath # string
+{
+   string=$1
+
+   if [[ -z $string ]]; then
+      return
+   fi
+
+   if [[ $string = "." ]]; then
+      strip_path=`echo $PATH|/bin/sed -e "s+\.:++g"|/bin/sed -e "s+::+:+g"`
+   else
+      strip_path=`echo $PATH|/bin/sed -e "s+$string:++g"|/bin/sed -e "s+::+:+g"`
+   fi
+
+   export PATH=$strip_path
+
+}
+# typeset -fx cleanpath
+
+#- Ajoute un path au debut (par defaut) ou a la fin de PATH
+#- On elimine egalement les doublons
+function addpath # /new/path [begin|end]
+{
+   new_path=$1
+   position=${2:-begin}
+
+   cleanpath $new_path
+
+   if [[ $position = "begin" ]]; then
+      export PATH="$new_path:$strip_path"
+   else
+      export PATH="$strip_path:$new_path"
+   fi
+}
+# typeset -fx addpath
+
+#- Ajouter un path au debut de MANPATH
+function addmanpath # /new/path
+{
+   new_path=$1
+   if [[ $new_path = "." ]]; then
+      strip_manpath=`echo $MANPATH|/bin/sed -e "s+\.++g"|/bin/sed -e 's+::+:+g'`
+   else
+      strip_manpath=`echo $MANPATH|/bin/sed -e "s+:$new_path++g"|/bin/sed -e 's+::+:+g'`
+   fi
+   export MANPATH="$new_path:$strip_manpath"
+}
+# typeset -fx addmanpath
+
+#- Pose une question et retourne une reponse non nulle
+function ask # question
+{
+   #typeset -l reply
+
+   while true; do
+      printf "$*" >&2
+      read -r reply || return 1
+      if [[ $reply != "" ]]; then
+         echo $reply
+         return 0
+      fi
+   done
+}
+# typeset -fx ask
+
+# - Affiche la Xieme ligne
+function showline # number file_name
+{
+   head -$1 $2|tail -1
+}
+# typeset -fx showline
+
+#- Imprime du code, format portrait, 2 par page, recto verso avec entete, pied de page et bordure... full cute
+function printcode #file list
+{
+   for file in $*
+   do
+      a2ps -o- -r --medium=Letter --columns=1 -f6.0 $file  | lpr -P${PRINTER}
+   done
+}
+# typeset -fx printcode
+
+#- Cree un repertoire et saute dedans
+function mkcd
+{
+   mkdir -p $1
+   if [[ -d $1 ]]; then
+      cd $1
+   else
+      echo "N'a pu creer le repertoire $1"
+   fi
+}
+# typeset -fx ddddmkcd
+
+#- Bottin telephonique du CMC, celui eui est mis a jour
+function phone
+{
+   cat ~afsdjmg/.bottin ${HOME}/.bottin 2>/dev/null | grep -is $*
+}
+# typeset -fx phone
+export PAQUETS_CHARGES
+function mon_ssm_plus # paquet [...]
+{
+   # On verifie en premier si le paquet est deja charge
+   unset liste_a_charger
+   for paquet in $*
+   do
+      echo ${PAQUETS_CHARGES} |grep "${paquet}" &>/dev/null
+      if [[ $? = 0 ]]; then
+         echo "Le paquet ${paquet} est deja charge"
+         return
+      else
+         liste_a_charger+="${paquet} "
+      fi
+   done
+   . r.load.dot ${liste_a_charger}&&PAQUETS_CHARGES+=${liste_a_charger}
+   export PAQUETS_CHARGES
+}
+
+function mon_ssm_liste
+{
+   echo ${PAQUETS_CHARGES}
+}
+
+function ditetfait
+{
+   echo $*
+   $*
+}
+
+function llcancel #job_id [job_id ...]
+{   
+   for jid in $*
+   do
+      cluster="hadar"
+      machine=$(echo $jid|cut -c -2)
+      if [[ ${machine} == "c1" ]] ; then
+         cluster="spica"
+      fi
+      ssh ${cluster} /usr/bin/llcancel $jid
+   done
+}
+
+function rs
+{
+   options=""
+   machine=${1}
+   echo ssh -t -Y $options $machine "export REMOTEUSER=$USER ; bash --login"
+   ssh -t -Y $options $machine "export REMOTEUSER=$USER ; bash --login"
+}
+typeset -fx rs
+
+
+
+# #- Which ++ qui cherche dans l'ordre dans les alias, fonctions, les commandes intrinseque et le PATH.
+# #- Sur AIX, which -a n'est pas supporte donc il n'affiche que le premier visible dans le PATH
+# function whence
+# {
+#    # Liste des commandes intrinseque de BASH.  Conserver les espaces du debut et de la fin.
+#    bash_builtin=" alias bg bind break builtin cd command compgen complete continue declare dirs disown echo enable eval exec exit export fc fg getopts hash help history jobs kill let local logout popd printf pushd pwd read readonly return set shift shopt source suspend test times trap type typeset ulimit umask unalias unset wait "
+#    # Retrouve une commande a travers les alias, fonctions et la variable $PATH (avec which)
+#    whence_trouve=0
+#
+#    # Etape 1: les alias
+#    resultat=`alias -p|cut -b 7-|grep "^${1}="`
+#    if [[ $? -eq 0 ]]; then
+#       echo "\`${1}\` est un alias pour ${resultat#*=}"
+#       whence_trouve=1
+#    fi
+#
+#    # Etape 2: les fonctions
+#    resultat=`set|grep "^$1 ()"`
+#    if [[ $? -eq 0 ]]; then
+#       echo "\`${1}\` est une fonction"
+#       whence_trouve=1
+#    fi
+#
+#    # Etape 3: Intrinseque (builtin)
+#    if [[ -f $BASH ]]; then
+#       resultat=`echo "${bash_builtin}" | grep " ${1} "`
+#       if [[ $? -eq 0 ]]; then
+#          echo "\`${1}\` est une commande intrinseque de BASH (a.k.a. builtin)"
+#          whence_trouve=1
+#       fi
+#    fi
+#
+#    # Etape 4: $PATH
+#    if [ $(uname) == "AIX" ]; then
+#       option=""
+#    else
+#       option="-a"
+#    fi
+#    which ${option} $1 &>/dev/null
+#    if [[ $? -eq 0 ]]; then
+#       whence_trouve=1
+#       for file in `which ${option} $1` ;
+#       do
+#          if [[ -L $file ]]; then
+#             echo `stat $file -c "%N"|sed 's/\`//g'|sed "s/'//g"`
+#          else
+#             echo "$file"
+#          fi
+#       done
+#    fi
+#
+#    if [[ $whence_trouve -eq 0 ]];then
+#       echo "$1 introuvable"
+#    fi
+#
+# }
+# typeset -fx whence
+
+
+
+
+

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# echo "PATH=$PATH"
+
+#if [[ -r /home/afsu/dev/.profile.d/default/pre ]] ; then
+#   echo "... source /home/afsu/dev/.profile.d/default/pre"
+#   . /home/afsu/dev/.profile.d/default/pre
+#fi
+
+#. r.module.dot # Permet d'utiliser r.load.dot
+
+#export LC_ALL="C"
+export KDEHOME=~/.kde4
+export TZ=EST5EDT
+export TERM=xterm
+
+export NO_STOP_MESSAGE=shhhhhhhhh
+
+export PS1="\[\e[33;40m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\] \[\e[36m\][\[\e[m\]\[\e[36m\]\T\[\e[m\]\[\e[36m\]]\[\e[m\] \w \[\e[35m\]\\$\[\e[m\] "
+
+#. r.load.dot rpn/utils/16.2
+
+# Ne pas oublier de changer le HCRON de mserver si la version de maestro change!
+. r.load.dot cmoi/base/20160901
+### maestro                                                                                                                                                                    
+# . r.load.dot isst/maestro/1.5.1-rc11                                                                                                                                             
+# export SEQ_MAESTRO_SHORTCUT=". r.load.dot isst/maestro/1.5.1-rc11"    
+# Presentement, c'est 1.5.0
+# /users/dor/afsu/hul/.hcron/cron-dev1.cmc.ec.gc.ca/events/maestro/mserver.hcron; ssh cron-dev1.cmc.ec.gc.ca hcron-reload
+   
+# SPI
+#. ssmuse-sh -d cmds/apps/SPI/beta
+#. ssmuse-sh -x cmds/ext/20190205
+#. ssmuse-sh -d rpn/libs/16.3-beta

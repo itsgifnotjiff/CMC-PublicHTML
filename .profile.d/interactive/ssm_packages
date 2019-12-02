@@ -1,0 +1,2 @@
+#!/bin/bash
+. ssmuse-sh -d hpcs/exp/sscp-1.5.7

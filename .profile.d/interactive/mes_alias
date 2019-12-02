@@ -1,0 +1,173 @@
+#!/bin/bash
+
+# alias cmc='. ~/.profile_commun'
+
+##################################################################
+####                Historique des repertoires                ####
+##################################################################
+if [[ -f ~afsuhul/bin/historique_repertoire ]]; then
+   DIR_HISTORY_SIZE=20
+   alias cdf='ddddhchdir forward'
+   alias cds='ddddhchdir back'
+   alias cdm='ddddhchdir move'
+   alias cdc='ddddhchdir clean'
+   alias cdh='ddddhchdir display'
+   alias  cd='ddddhchdir new'
+   . ~afsuhul/bin/historique_repertoire
+fi
+
+##################################################################
+###                       Alias de lacheté                    ####
+##################################################################
+alias  soffice='LC_ALL=fr_CA.UTF-8 soffice'
+alias  temps='soffice ~afsuhul/pastouche/feuille_de_temps.ods &>/dev/null &'
+alias   cafe='soffice ~afsuhul/pastouche/Transactions_cafe.ods &>/dev/null &'
+alias      v='voir -iment '
+alias      h='history -100'
+alias     rm='rm -i'
+alias   cd..="cd .."
+alias   cp='cp -v'
+alias     cl=clear
+alias     sl='showline'
+
+alias ll='ls -lh --color'
+alias lsa='ls -lhap --color | more'
+alias lrt='ls -lhrt --color'
+
+alias  space='find . -maxdepth 1 -exec du -sk {} 2>/dev/null \;|sort -g'
+alias forchk.me='forchk -ff -obs -standard -pwid 255 -shsrc'
+alias reset_moz="rm -f ~/.mozilla/firefox/*/{.parentlock,lock} ~/.thunderbird/*/{.parentlock,lock}"
+alias whence='type -a'
+if [[ `uname` = "Linux" ]]; then
+   alias kate='kate -u'
+fi
+
+function gem
+{
+   unset LANG
+   . r.load.dot GEM/$1
+}
+
+
+##################################################################
+####                         Alias grep                       ####
+##################################################################
+alias fgp='find .                                    |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fgc='find . -name "*.c"                        |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fgh='find . -name "*.h"                        |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fgm='find . -name "*akefile"                   |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fgj='find . -name "*.js"                       |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fght='find . -name "*.html"                    |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fgf='find . -name "*.ftn*" -o -name "*.cdk*"   |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fgt='find . -name "*.tcl"                      |grep -v svn| grep -v "~$"| xargs grep -n'
+alias fgs='find . -name "*.ksh*" -o -name "*.bash*" -o -name "*.sh*"  |grep -v svn| grep -v "~$"| xargs grep -n'
+
+##################################################################
+####                        Alias Machine                     ####
+##################################################################
+for machine in azathoth delirium explosium cesium yamium opium carthagium equilibrium titanium aquarium unobtainium akalamiumium magicium latium trivium tritium joule cetus aldebaran astrid corvo;
+do
+   alias $machine="rs ${machine}.cmc.ec.gc.ca"
+done
+
+alias p1="ssh -t -Y hug000@eccc-ppp1.science.gc.ca bash --login"
+alias ap1="ssh -t -Y smco801@eccc-ppp1.science.gc.ca bash --login"
+alias dp1="ssh -t -Y smco800@eccc-ppp1.science.gc.ca bash --login"
+
+alias p2="ssh -t -Y hug000@eccc-ppp2.science.gc.ca bash --login"
+alias ap2="ssh -t -Y smco801@eccc-ppp2.science.gc.ca bash --login"
+alias dp2="ssh -t -Y smco800@eccc-ppp2.science.gc.ca bash --login"
+
+alias hare="ssh -t -Y hug000@sci-eccc-in.science.gc.ca 'ssh -YCt hare.science.gc.ca bash --login'"
+alias hair="ssh -t -Y smco801@sci-eccc-in.science.gc.ca 'ssh -YCt hare.science.gc.ca bash --login'"
+
+alias brooks="ssh -t -Y hug000@sci-eccc-in.science.gc.ca 'ssh -YCt brooks.science.gc.ca bash --login'"
+alias ab="ssh -t -Y smco801@sci-eccc-in.science.gc.ca 'ssh -YCt brooks.science.gc.ca bash --login'"
+alias db="ssh -t -Y smco800@sci-eccc-in.science.gc.ca 'ssh -YCt brooks.science.gc.ca export REMOTEUSER=\"hug000\" ; bash --login'"
+
+alias g1="ssh -t -Y hug000@eccc-gpsc1.science.gc.ca export REMOTEUSER="hug000" ; bash --login"
+alias g2="ssh -t -Y hug000@eccc-gpsc2.science.gc.ca export REMOTEUSER="hug000" ; bash --login"
+
+alias adm="ssh -t -Y sadm800@eccc-ppp2.science.gc.ca export REMOTEUSER=\"hug000\" ; bash --login"
+
+##################################################################
+####             Alias dedoublement de personalite            ####
+##################################################################
+alias       dev='ssh -Y -t $HOST      -l afsudev   "export REMOTEUSER=$USER ; bash --login"'
+alias       air='ssh -Y -t $HOST      -l afsuair   "export REMOTEUSER=$USER ; bash --login"'
+alias       sno='ssh -Y -t $HOST      -l afsusno   "export REMOTEUSER=$USER ; bash --login"'
+alias       tra='ssh -Y -t $HOST      -l afsutra   "export REMOTEUSER=$USER ; bash --login"'
+alias    airftp='ssh -Y air@accessdepot'
+alias      cmds='ssh -Y -t $HOST      -l afsmhul   "export REMOTEUSER=$USER ; bash --login"'
+
+##################################################################
+####                      Alias Subversion                    ####
+##################################################################
+alias mod='svn status'
+
+##################################################################
+####                     Alias de programmes                  ####
+##################################################################
+
+alias runxp='rdesktop eccmcwts4 -u "landryh" -d "eccmc" -g 1910x1120 &' 
+alias runxp_maison='rdesktop eccmcwts4 -u "landryh" -d "eccmc" -g 1910x1020 &'
+
+alias afsu.llq='watch -n 10 "s.llq --all 2>/dev/null|grep afsu|grep -v CPUS"'
+alias crontab="crontab -i"
+
+# export VERSION_SPI=7.10.1
+alias pgi="echo . r.load.dot hpcs/13b/03/base -d hpcs/13b/03/pgi1301;. r.load.dot hpcs/13b/03/base hpcs/13b/03/pgi1301"
+# alias spi='echo "chargement de SPI $VERSION_SPI";. r.load.dot /ssm/net/cmoe/apps/SPI_$VERSION_SPI'
+
+alias pidgin='NSS_SSL_CBC_RANDOM_IV=0 /usr/bin/pidgin'
+alias thinlinc='. r.load.dot hpcs/ext/thinlinc-4.7.0 ;tlclient -C ~/.thinlinc/tlclient.conf &>/dev/null &'
+alias thinlinc_air='. r.load.dot hpcs/ext/thinlinc-4.7.0 ;tlclient -C ~/.thinlinc/tlclient.air.conf &>/dev/null &'
+alias rmnlib='. r.load.dot rpn/libs/16.2 rpn/utils/16.2.2'
+alias r.dict='o.dict'
+
+# export LS_COLORS="ex=1:ln=34:or=1;31"
+# di = directory
+# fi = file
+# ln = symbolic link
+# pi = fifo file
+# so = socket file
+# bd = block (buffered) special file
+# cd = character (unbuffered) special file
+# or = symbolic link pointing to a non-existent file (orphan)
+# mi = non-existent file pointed to by a symbolic link (visible when you type ls -l)
+# ex = file which is executable (ie. has 'x' set in permissions).
+# 
+# 0   = default colour
+# 1   = bold
+# 4   = underlined
+# 5   = flashing text
+# 7   = reverse field
+# 31  = red
+# 32  = green
+# 33  = orange
+# 34  = blue
+# 35  = purple
+# 36  = cyan
+# 37  = grey
+# 40  = black background
+# 41  = red background
+# 42  = green background
+# 43  = orange background
+# 44  = blue background
+# 45  = purple background
+# 46  = cyan background
+# 47  = grey background
+# 90  = dark grey
+# 91  = light red
+# 92  = light green
+# 93  = yellow
+# 94  = light blue
+# 95  = light purple
+# 96  = turquoise
+# 100 = dark grey background
+# 101 = light red background
+# 102 = light green background
+# 103 = yellow background
+# 104 = light blue background
+# 105 = light purple background
+# 106 = turquoise background

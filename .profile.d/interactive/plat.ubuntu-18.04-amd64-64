@@ -1,0 +1,4 @@
+#----- HPCO compiler environment
+
+. ssmuse-sh -x hpcs/201402/04/base -x hpco/exp/intelcomp-2019.0.045
+. ssmuse-sh -x hpco/exp/openmpi/openmpi-3.1.2--hpcx-2.2.0--ofed-4.4.2--intel-2019.0.045

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export LC_ALL="C"
+export KDEHOME=~/.kde4
+export TZ=EST5EDT
+export TERM=xterm
+
+export NO_STOP_MESSAGE=shhhhhhhhh
+
+export PS1="\[\e[33;40m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\] \[\e[36m\][\[\e[m\]\[\e[36m\]\T\[\e[m\]\[\e[36m\]]\[\e[m\] \w \[\e[35m\]\\$\[\e[m\] "
+
+# Ne pas oublier de changer le HCRON de mserver si la version de maestro change!
+. r.load.dot cmoi/base/20160901
+
