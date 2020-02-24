@@ -1,0 +1,92 @@
+html, body {
+   margin: 0;
+   padding: 0;
+   font-family: sans-serif;
+   background-color: #FFFFFF;
+}
+
+.binGraphContainer {
+   margin: 1em;
+}
+
+.graph {
+   width: 900px;
+   height: 480px;
+}
+
+.metAreaTsGraph {
+   width: 100%;
+   height: 480px;
+}
+
+.graphPanel {
+   padding: 0px;
+   overflow: hidden;
+}
+
+#Header {
+   padding-left: 1em;
+   background-color: #F0F0F0;
+   border-bottom: 1px solid #AAAAAA;
+   position: fixed;
+   top: 0;
+   width: 100%;
+}
+
+#plotArea {
+   margin-top: 8em;
+}
+
+#Legend {
+   font-size: 0.6em;
+   position: absolute;
+   right: 0;
+   top: 0;
+   margin-right: 1em;
+   margin-top: 0;
+   border-style: solid;
+   border-width: 1px;
+   border-color: #AAAAAA;
+}
+
+.Base00 {
+   width: 0.8em;
+   height: 0.8em;
+   background-color: #3333FF;
+}
+
+.Test00 {
+   width: 0.8em;
+   height: 0.8em;
+   background-color: #FF3333;
+}
+
+.Base12 {
+   width: 0.8em;
+   height: 0.8em;
+   background-color: #8888FF;
+}
+
+.Test12 {
+   width: 0.8em;
+   height: 0.8em;
+   background-color: #FF8888;
+}
+
+.Base {
+   background-color: #3333FF;
+   width: 0.8em;
+   height: 0.8em;
+}
+
+.Test {
+   background-color: #FF3333;
+   width: 0.8em;
+   height: 0.8em;
+}
+
+.Obs {
+   background-color: #33FF33;
+   width: 0.8em;
+   height: 0.8em;
+}

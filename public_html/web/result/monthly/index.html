@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>VAQUM - Monthly Statisctics / Statistiques mensuelles</title>
+      <link rel="stylesheet" href="../../vaqum.css">
+   </head>
+   <body>
+      <h1>Monthly Statistics / Statistiques mensuelles</h1>
+      <div id="configs"></div>
+      <script>
+         var dojoConfig = {
+            async: true,
+            packages: [{
+               name: "vaqum",
+               location: location.pathname.replace(/[^/]*\/[^/]*\/[^/]*$/, '') + 'dojo'
+            }]
+         };
+      </script>
+      <script src="/dojo/dojo/dojo.js"></script>
+      <script>
+         require([
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dojo/request",
+            "dojo/domReady!"
+         ], function(dom, domConstruct, request) {
+            request.get(
+               "../../rodb/monthlyStatConfig",
+               {
+                  handleAs: "json",
+               }
+            ).then(function(reply) {
+               var table = domConstruct.create("table", null, "configs");
+
+               var header = domConstruct.create("thead", null, table);
+               var row = domConstruct.create("tr", null, header);
+               var cell = domConstruct.create("th", null, row);
+               cell.innerHTML = 'ID';
+               var cell = domConstruct.create("th", null, row);
+               cell.innerHTML = 'First Hour<br>Première heure';
+               var cell = domConstruct.create("th", null, row);
+               cell.innerHTML = 'Interval<br>Intervalle';
+               var cell = domConstruct.create("th", null, row);
+               cell.innerHTML = 'Last Hour<br>Dernière heure';
+               var cell = domConstruct.create("th", null, row);
+               cell.innerHTML = 'Summary Table<br>Tableau sommaire';
+               var cell = domConstruct.create("th", null, row);
+               cell.innerHTML = 'Per variable charts<br>Graphiques par variable';
+               var cell = domConstruct.create("th", null, row);
+               cell.innerHTML = 'Per forecast hour chart<br>Graphique par heure de prévision';
+
+               var body = domConstruct.create("tbody", null, table);
+               for (var i in reply) {
+                  var row = domConstruct.create("tr", null, header);
+
+                  var cell = domConstruct.create("td", null, row);
+                  cell.innerHTML = reply[i].id;
+                  var cell = domConstruct.create("td", null, row);
+                  cell.innerHTML = reply[i].firsthour;
+                  var cell = domConstruct.create("td", null, row);
+                  cell.innerHTML = reply[i].hourstep;
+                  var cell = domConstruct.create("td", null, row);
+                  cell.innerHTML = reply[i].lasthour;
+                  var cell = domConstruct.create("td", null, row);
+                  cell.innerHTML = '<a href="summary.html#monthlyStatConfig=' + reply[i].id + '">Table</a>';
+                  var cell = domConstruct.create("td", null, row);
+                  cell.innerHTML = '<a href="charts.html#monthlyStatConfig=' + reply[i].id + '">Graph</a>';
+                  var cell = domConstruct.create("td", null, row);
+                  cell.innerHTML = '<a href="fctHourChart.html#monthlyStatConfig=' + reply[i].id + '">Graph</a>';
+               }
+            });
+         });
+      </script>
+   </body>
+</html>

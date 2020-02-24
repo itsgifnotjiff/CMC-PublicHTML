@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <title>VAQUM - Observations</title>
+      <link rel="stylesheet" href="observation.css" media="screen">
+      <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css" media="screen">
+      <link rel="stylesheet" href="root/dojo/LoadingAnimation.css">
+   </head>
+   <body class="claro">
+      <script src="root/dojoConfig.js"></script>
+      <div id="loadingOverlay"></div>
+      <div id="appBody">
+         <form id="controls">
+            <label for="datasetSelect">Dataset : </label>
+            <div id="datasetSelect" name="datasetSelect"></div>
+            <br>
+            <label for="methodSelect">Method : </label>
+            <div id="methodSelect" name="methodSelect"></div>
+            <br>
+            <label for="stationSelect">Station : </label>
+            <div id="stationSelect" name="stationSelect"></div>
+            <br>
+            <label for="dateMinSelect">Start date : </label>
+            <div id="dateMinSelect" name="dateMinSelect"></div>
+            <br>
+            <label for="dateMaxSelect">End date : </label>
+            <div id="dateMaxSelect" name="dateMaxSelect"></div>
+            <br>
+            <div id="loadButton" name="loadButton"></div>
+            <a id="displayedLink" name="displayedLink">Link to displayed results</a>
+         </form>
+         <div id="obsGraph" name="obsGraph"></div>
+         <div id="saveButton" name="saveButton"></div>
+      </div>
+      <script src="/dojo/dojo/dojo.js"></script>
+      <script>
+         require([
+            "dojo/_base/lang",
+            "dojo/dom",
+            "dojo/request",
+            "dojo/date/stamp",
+            "dojo/date/locale",
+            "dojox/charting/Chart",
+            "dojox/charting/themes/Claro",
+            "dojox/charting/action2d/Tooltip",
+            "dojox/charting/action2d/Highlight",
+            "dojox/charting/plot2d/Lines",
+            "dojox/charting/plot2d/Indicator",
+            "dojox/charting/plot2d/Grid",
+            "dojox/charting/axis2d/Default",
+            "dojox/gfx/utils",
+            "vaqum/jsonStore",
+            "vaqum/LoadingAnimation",
+            "dijit/form/FilteringSelect",
+            "dijit/form/DateTextBox",
+            "dijit/form/Button",
+            "dojo/io-query",
+            "dojo/domReady!"
+         ], function(lang, dom, request, stamp, locale, Chart, theme, Tooltip, Highlight, Lines, Indicator, Grid, Axis2d, utils, JsonStore, LoadingAnimation, FilteringSelect, DateTextBox, Button, ioQuery) {
+            var loadingAnimation = new LoadingAnimation("loadingOverlay");
+
+            var pathParts = document.location.pathname.split('/');
+            if ( pathParts[pathParts.length - 3] == 'config' ) {
+               var db = 'db';
+            } else {
+               var db = 'rodb';
+            }
+
+            var datasetStore = new JsonStore({target: 'root/' + db + '/dataset/'});
+            var methodStore = new JsonStore({target: 'root/' + db + '/method/'});
+            var stationStore = new JsonStore({target: 'root/' + db + '/station/'});
+
+            var datasetSel = new FilteringSelect({
+               store: datasetStore,
+               searchAttr: 'name',
+               style: "width: 32em;"
+            }, "datasetSelect");
+
+            var methodSel = new FilteringSelect({
+               store: methodStore,
+               searchAttr: 'display',
+               style: "width: 32em;"
+            }, "methodSelect");
+
+            var stationSel = new FilteringSelect({
+               store: stationStore,
+               searchAttr: 'display',
+               style: "width: 32em;",
+               queryExpr: '*${0}*',
+               searchDelay: 500
+            }, "stationSelect");
+
+            var dateMinSel = new DateTextBox({
+               constraints: {datePattern:'yyyy-MM-dd'}
+            }, "dateMinSelect");
+
+            var dateMaxSel = new DateTextBox({
+               constraints: {datePattern:'yyyy-MM-dd'}
+            }, "dateMaxSelect");
+
+            var now = new Date();
+            dateMinSel.constraints.min = '2006-01-01';
+            dateMinSel.constraints.max = now;
+            dateMaxSel.constraints.max = now;
+
+            // Define parameters from HTTP query string
+            var pageQuery = ioQuery.queryToObject(decodeURIComponent(document.location.search.slice(1)));
+
+            var searchParams = {};
+
+            searchParams.dataset = pageQuery.dataset;
+            if (typeof searchParams.dataset === 'undefined') {
+               searchParams.dataset = 9;
+            }
+            searchParams.method = pageQuery.method;
+            if (typeof searchParams.method === 'undefined') {
+               searchParams.method = 128;
+            }
+            searchParams.station = pageQuery.station;
+            if (typeof searchParams.station === 'undefined') {
+               searchParams.station = 61;
+            }
+            searchParams.dateMin = pageQuery.dateMin;
+            if (typeof searchParams.dateMin === 'undefined') {
+               searchParams.dateMin = new Date(now.getUTCFullYear(), now.getUTCMonth() -1 , now.getUTCDate());
+            } else {
+               searchParams.dateMin = stamp.fromISOString(searchParams.dateMin);
+            }
+            searchParams.dateMax = pageQuery.dateMax;
+            if (typeof searchParams.dateMax === 'undefined') {
+               searchParams.dateMax = now;
+            } else {
+               searchParams.dateMax = stamp.fromISOString(searchParams.dateMax);
+            }
+
+            // Get the egine running on our widgets
+            datasetSel.startup();
+            methodSel.startup();
+            stationSel.startup();
+            dateMinSel.startup();
+            dateMaxSel.startup();
+
+            datasetSel.set('value', searchParams.dataset);
+            methodSel.set('value', searchParams.method);
+            stationSel.set('value', searchParams.station);
+            dateMinSel.set('value', searchParams.dateMin);
+            dateMaxSel.set('value', searchParams.dateMax);
+
+            var loadBtn = new Button({
+               label: "Load"
+            }, "loadButton");
+            var saveBtn = new Button({
+               label: "Save"
+            }, "saveButton");
+
+            loadBtn.startup();
+            saveBtn.startup();
+
+            var chart = new Chart("obsGraph", {
+               title: "Observations",
+               htmlLabels: false
+            });
+
+            chart.addAxis("x", {
+               title: "Date",
+               titleOrientation: "away",
+               minorTicks: true,
+               htmlLabels: false,
+               minorLabels: true,
+               majorTickStep: 86400000,
+               minorTickStep: 21600000,
+               labelFunc: function(text, value, precision) {
+                  return locale.format(new Date(value), {
+                     selector: "date",
+                     datePattern: "y-M-d",
+                     locale: "en"
+                  });
+               }
+            });
+
+            chart.addAxis("y", {
+               title: "Concentration",
+               vertical: true,
+               htmlLabels: false,
+               majorTickStep: 10
+            });
+
+            chart.addPlot("default", {
+               type: Lines,
+               markers: true
+            });
+
+            chart.addPlot("threshold", {
+               type: Indicator,
+               vertical: false,
+               lineStroke: { color: "#949784", style: "Lines"},
+               labels: false,
+               values: 0
+            });
+
+            chart.addPlot("Grid", {
+               type: Grid,
+               hMajorLines: true,
+               hMinorLines: false,
+               vMajorLines: false,
+               vMinorLines: false,
+               majorHLine: { color: "#CCCCCC", width: 1 }
+            });
+
+            new Tooltip(chart,"default", {
+               text: function(n) {
+                  return ("(" + locale.format(n.x, {
+                     selector: "date",
+                     datePattern: "y-M-d HH:mm:ss",
+                     locale: "en"
+                  }) + ", " + n.y + ")")
+               }
+            });
+
+            chart.addSeries(
+               "Observations",
+               [],
+               {
+                  plot: "default"
+               }
+            );
+
+            theme.plotarea.fill = "#EFEFEF";
+            chart.setTheme(theme);
+
+            var context = {
+               datasetSel : datasetSel,
+               methodSel : methodSel,
+               stationSel : stationSel,
+               dateMinSel : dateMinSel,
+               dateMaxSel : dateMaxSel,
+               chart : chart
+            }
+
+            // Only allow to transfer obseration to the reject dataset if the page is using the read/write DB
+            if ( "db" == db ) {
+               new Highlight(chart, "default");
+
+               chart.connectToPlot("default", lang.hitch(context, function(evt) {
+                  if ( "onclick" == evt.type && "marker" == evt.element ) {
+                     var dataset = this.datasetSel.get('value');
+                     var method = this.methodSel.get('value');
+                     var station = this.stationSel.get('value');
+                     var startDate = stamp.toISOString(evt.x);
+                     var obsStr =
+                        "\tdataset = " + dataset +
+                        "\n\tduration = '1 hour'" +
+                        "\n\tmethod = " + method +
+                        "\n\tstation = " + station +
+                        "\n\tstartDate = " + startDate +
+                        "\n\tvalue = " + evt.y;
+                     var choice = confirm("Are you sure you want to transfer the obseration\n" + obsStr + "\nto  the reject dataset?");
+                     if (choice == true) {
+                        request.put(
+                           'root/' + db + '/observation/',
+                           {
+                              handleAs: "json",
+                              data: JSON.stringify({
+                                 newDataset: 15,
+                                 currentDataset: dataset,
+                                 duration: '1 hour',
+                                 method: method,
+                                 station: station,
+                                 startDate: startDate
+                              })
+                           }
+                        ).then(lang.hitch({chart: context.chart, evt: evt}, function(reply) {
+                           var series = this.chart.getSeries("Observations");
+                           series.data.splice(evt.index, 1);
+                           series.dirty = true;
+                           this.chart.getAxis("y").dirty = true;
+                           this.chart.render();
+                        }));
+                     }
+                  }
+               }));
+            }
+
+            var updateChart = lang.hitch(context, function(query) {
+               var displayedLink = dom.byId("displayedLink");
+               var curLoc = document.location;
+               displayedLink.href = curLoc.origin + curLoc.pathname +
+                  '?dataset=' + query.dataset +
+                  '&method=' + query.method +
+                  '&station=' + query.station +
+                  '&dateMin=' + query.dateMin +
+                  '&dateMax=' + query.dateMax;
+
+               // FIXME: Puisque la BD ne permet pas d'énumérer les durées en un temps raisonnable et
+               // que toutes les observations utilisées ont une durée d'une heure, on hack ça ici
+               query.duration = '01:00:00';
+
+               request.get(
+                  'root/' + db + '/observation/',
+                  {
+                     handleAs: "json",
+                     query: query
+                  }
+               ).then(lang.hitch(context, function(reply) {
+                  var graphData = [];
+                  var nbPoints = reply.length;
+                  for (var i = 0; i < nbPoints; i++) {
+                     var point = reply[i];
+                     var dateStr = point.startdateiso.replace(/\+.\d*/, "");
+                     var jsDate = stamp.fromISOString(dateStr.replace(/\ /, "T"));
+                     graphData.push({x: jsDate, y: point.value});
+                  }
+
+                  this.chart.series[0].data = graphData;
+                  this.chart.fullRender();
+               }));
+            });  // updateChart
+
+            var loadHandler = lang.hitch(context, function() {
+               var query = {
+                  dataset: this.datasetSel.get('value'),
+                  method: this.methodSel.get('value'),
+                  station: this.stationSel.get('value'),
+                  dateMin: stamp.toISOString(this.dateMinSel.get('value')).replace(/T.*/, ''),
+                  dateMax: stamp.toISOString(this.dateMaxSel.get('value')).replace(/T.*/, '')
+               };
+               updateChart(query);
+            }); // loadHandler
+            loadBtn.set('onClick', function() {loadingAnimation.load(loadHandler);});
+
+            var saveChart = function() {
+               utils.toSvg(chart.surface).then(lang.hitch(context, function(svg) {
+                  var download = document.createElement('a');
+                  download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(svg));
+                  download.setAttribute('download',
+                     this.datasetSel.get('value') + '_' +
+                     this.methodSel.get('value') + '_' +
+                     this.stationSel.get('value') + '_' +
+                     this.dateMinSel.get('displayedValue') + '_' +
+                     this.dateMaxSel.get('displayedValue') + ".svg"
+                  );
+                  document.body.appendChild(download);
+                  download.click();
+                  document.body.removeChild(download);
+               }));
+            };
+            saveBtn.set('onClick', saveChart);
+
+            searchParams.dateMin = stamp.toISOString(searchParams.dateMin).replace(/T.*/, '');
+            searchParams.dateMax = stamp.toISOString(searchParams.dateMax).replace(/T.*/, '');
+            loadingAnimation.load( function() {updateChart(searchParams);});
+         });
+      </script>
+   </body>
+</html>

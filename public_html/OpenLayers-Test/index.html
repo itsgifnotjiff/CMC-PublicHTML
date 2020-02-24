@@ -1,0 +1,28 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sidebar Test</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./v6.1.1-dist/ol.css">
+  </head>
+  <body>
+    <div class="grid-container">
+        <div class="grid-1">
+            <div class="sidebar">
+                <h2> Base Layers </h2>
+                <input type="radio" name='baseLayerRadioButton' value='OSMStandard' checked>OSM Standard<br>
+                <input type="radio" name='baseLayerRadioButton' value='OSMHumanitarian' checked>OSM Humanitarian<br>
+                <input type="radio" name='baseLayerRadioButton' value='StamenTerrain' checked>OSM Stamen Terrain<br>
+                <input type="radio" name='baseLayerRadioButton' value='openStreetMapGeoMetCurrentConditions' checked>GeoMet Current Conditions<br>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div id='js-map' class='map'></div>
+        </div>
+    </div>
+    <script src='./main.js'></script>
+    <script src='./v6.1.1-dist/ol.js'></script>
+  </body>
+</html>

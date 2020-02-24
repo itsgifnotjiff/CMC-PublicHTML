@@ -1,0 +1,7 @@
+SSLRequireSSL
+
+AuthType Basic
+AuthName "VAQUM"
+AuthUserFile "/local/devtools/web/auth/http_users"
+AuthGroupFile "/local/devtools/web/auth/groups"
+Require group "VAQUM"

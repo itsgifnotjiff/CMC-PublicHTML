@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>VAQUM - Results</title>
+   <link rel="stylesheet" href="vaqum.css">
+</head>
+<body>
+   <h1>VAQUM</h1>
+   <ul>
+      <li><a href="result">View results</a></li>
+      <li><a href="observation">View observation time-series</a></li>
+      <li><a href="tableViewer.html">Table Viewer</a> (Requires a VAQUM account)</li>
+      <li><a href="config">Configure and launch comparisons</a> (Requires a VAQUM account)</li>
+   </ul>
+   <br>
+   <h3>Changes compared to previous version (2019-08-21) </h3>
+   <ul>
+      <li>
+         UPDATE: Oct 29th
+         Comparison statiscs: All charts now has a download CSV button except for the value bin charts.
+
+         Per hour statistics graphs, per hour averages graphs and Metropolitan Areas Time Series can now be downloaded as CSVs.
+      </li>
+      <br>
+      <li>
+         Monthly statiscs: Per forecast hour charts now has a download CSV button
+      </li>
+      <br>
+      <li>
+         Monthly statiscs: Per variable charts now scales the chart axis a bit with a 7 day wiggle room at both ends of the X axis for easier hovering on the edge data point
+      </li>
+      <br>
+      <li>
+         Monthly statiscs: downloading the csv values of the per variable chart will no longer give the null values at the beginning of a series that has no data until a certain month.
+
+         If a serie only has data from 2016-01, and the month selection is from 2015-01 and on, the csv files will only have the data for the series from when it first has data and not all the full range of months even when everything is null at the begining.
+      </li>
+      <br>
+      <li>
+         Monthly statiscs per variable chart: if a serie has no data/stats in the particular variable, it will no longer show up on the legend of the chart at all.
+      </li>
+      <br>
+      <li>
+         Monthly statiscs have now been calculated with station groups. 
+         <br>
+         Each station now has one of 3 classes: Urban (cities and towns), Urban Bound (airports, near city boundaries) and Rural.
+         <br>
+         The monthly statistics are now calculated separately for different groups of station classes. There are mainly 3 useful groups: 
+         <br>
+         <br>
+         1- All stations 
+         <br>
+         2- Rural stations 
+         <br>
+         3- both Urban and Urban bound stations.
+         <br>
+         <br>
+         Both the per variable and per forecast hour charts now have a multi checked lists of which station groups to choose from.
+         <br>
+         The colors will be slightly different now due to each group of a serie being its own line and color, therefore tripling the amount of lines in each chart.
+         <br>
+         <br>
+         PS. When there's lots of data points with many groups on the charts, toggling the selected groups with the checkboxes can take a second or two of lag to re-render the chart.
+      </li>
+   </ul>
+   <h4>
+      For any comment, bugs or suggestions on the vaqum website, contact patrick.mmanseau@canada.ca or sijun.peng3@canada.ca.
+   </h4>
+</body>
+</html>

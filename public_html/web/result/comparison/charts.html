@@ -1,0 +1,205 @@
+<!DOCTYPE HTML>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>VAQUM - Result Charts / Graphiques des résultats</title>
+      <link rel="stylesheet" href="../charts.css" media="screen">
+      <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css" media="screen">
+   </head>
+   <body class="claro">
+      <div id="Header">
+         <div id="Controls">
+            <label for="regionSelect">Region : </label>
+            <div id="regionSelect" name="regionSelect"></div>
+            <br>
+            <label for="variableSelect">Variable : </label>
+            <div id="variableSelect" name="variableSelect"></div>
+         </div>
+         <div id="Legend"></div>
+      </div>
+      <div id="plotArea"></div>
+      <script>
+         var dojoConfig = {
+            async: true,
+            packages: [{
+               name: "vaqum",
+               location: location.pathname.replace(/[^/]*\/[^/]*\/[^/]*$/, '') + 'dojo'
+            }]
+         };
+      </script>
+      <script src="/dojo/dojo/dojo.js"></script>
+      <script src="../svg2png.js"></script>
+      <script>
+         require([
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dojo/io-query",
+            "dojo/hash",
+            "dojo/topic",
+            "dojo/_base/lang",
+            "dojo/request",
+            "dojo/store/Memory",
+            "vaqum/jsonStore",
+            "dijit/form/FilteringSelect",
+            "vaqum/binStatCharts",
+            "vaqum/fctHourStatCharts",
+            "vaqum/fctHourAvgCharts",
+            "vaqum/metAreaTsCharts",
+            "dojo/domReady!"
+         ], function(dom, domConstruct, ioQuery, hash, topic, lang, request, Memory, JsonStore, FilteringSelect, BinStatCharts, FctHourStatCharts, FctHourAvgCharts, MetAreaTsCharts) {
+            var charts;
+            var firstLoad = true;
+
+            var pageQuery = ioQuery.queryToObject(hash());
+
+            var comparisonId = pageQuery.comparison;
+            var variableId = pageQuery.variable;
+            var regionId = pageQuery.region;
+            var chartType = pageQuery.chartType;
+
+            switch (chartType) {
+               case "binStat":
+                  charts = new BinStatCharts(dom.byId("plotArea"), dom.byId("Legend"));
+                  break;
+               case "fctHourStat":
+                  charts = new FctHourStatCharts(dom.byId("plotArea"), dom.byId("Legend"));
+                  break;
+               case "fctHourAvg":
+                  charts = new FctHourAvgCharts(dom.byId("plotArea"), dom.byId("Legend"));
+                  break;
+               case "metAreaTs":
+                  charts = new MetAreaTsCharts(dom.byId("plotArea"), dom.byId("Legend"));
+                  break;
+               default:
+                  alert("Unknown chart type sepcified in the URL!");
+                  return null;
+            }
+
+            var regionStore = new Memory();
+            var variableStore = new Memory();
+
+            function updateCharts(hash) {
+               var query = ioQuery.queryToObject(hash);
+               if ( query.comparison && query.region && query.variable ) {
+                  charts.update(query.comparison, query.region, query.variable);
+
+                  regionSel.set('value', query.region, false);
+                  variableSel.set('value', query.variable, false);
+               }
+            }
+
+            window.addEventListener('resize', function(evt) {
+               var plotAreaNode = dom.byId("plotArea");
+               charts.resize(charts, plotAreaNode.clientWidth);
+            });
+
+
+            function changeSelection() {
+               if (regionId && variableId) {
+                  // Only load if the selection has changed from the request in the URL
+                  var requestedParams = {
+                     comparison: comparisonId,
+                     chartType: chartType,
+                     region: regionId,
+                     variable: variableId
+                  }
+
+                  hash(ioQuery.objectToQuery(requestedParams));
+                  if (firstLoad) {
+                     // There is no publish if the hash isn't changed.  Therefore, to work on fully qualified
+                     // initial page load, we have to explicitly call updateCharts
+                     updateCharts(ioQuery.objectToQuery(requestedParams));
+                     firstLoad = false;
+                  }
+               }
+            }
+
+
+            function onRegionChange(newRegionId) {
+               regionId = newRegionId;
+               var target = "../../rodb/" + chartType + "Variable";
+               request.get(
+                  target,
+                  {
+                     handleAs: "json",
+                     query: {
+                        comparison: comparisonId,
+                        region: newRegionId
+                     }
+                  }
+               ).then(lang.hitch(this, function(result) {
+                  variableStore.setData(result);
+                  if (result.length > 0) {
+                     if (variableId === undefined) {
+                        // The page has been initially loaded and no variable was specified
+                        variableId = variableStore.data[0].id;
+                     } else {
+                        // The region was changed and a variable was already selected.
+                        // We have to check if it's available for the selected region.
+                        var hasVariable = false;
+                        for (item of variableStore.data) {
+                           if (item.id == variableId) {
+                              hasVariable = true;
+                              break;
+                           }
+                        }
+                        if (!hasVariable) {
+                           variableId = variableStore.data[0].id;
+                        }
+                     }
+                     variableSel.set('value', variableId);
+                  }
+                  variableSel.set('disabled', (0 == result.length));
+                  changeSelection();
+               }));
+            }
+
+
+            function onVariableChange(newVariableId) {
+               variableId = newVariableId;
+               changeSelection();
+            }
+
+
+            var regionSel = new FilteringSelect({
+               store: regionStore,
+               searchAttr: 'name_en_ca',
+               style: 'width: 32em;',
+               disabled: true,
+               onChange: onRegionChange
+            }, "regionSelect");
+
+
+            var variableSel = new FilteringSelect({
+               store: variableStore,
+               searchAttr: 'abreviation',
+               disabled: true,
+               onChange: onVariableChange
+            }, "variableSelect");
+
+            var target = "../../rodb/" + chartType + "Region";
+            request.get(
+               target,
+               {
+                  handleAs: "json",
+                  query: {
+                     comparison: comparisonId
+                  }
+               }
+            ).then(lang.hitch(this, function(result) {
+               regionStore.setData(result);
+
+               if (result.length > 0) {
+                  if (regionId === undefined) {
+                     regionId = regionStore.data[0].id;
+                  }
+                  regionSel.set('value', regionId);
+               }
+               regionSel.set('disabled', (0 == result.length));
+            }));
+
+            topic.subscribe("/dojo/hashchange", updateCharts);
+         });
+      </script>
+   </body>
+</html>

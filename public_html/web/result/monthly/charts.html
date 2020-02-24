@@ -1,0 +1,339 @@
+<!DOCTYPE HTML>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>VAQUM - Result Charts / Graphiques des résultats</title>
+      <link rel="stylesheet" href="../charts.css" media="screen">
+      <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css" media="screen">
+   </head>
+   <body class="claro">
+      <div id="Header">
+         <div id="Controls">
+            <label for="regionSelect">Region : </label>
+            <div id="regionSelect"></div>
+            <br>
+            <label for="forecastDaySelect">Forecast Day : </label>
+            <div id="forecastDaySelect"></div>
+            <br>
+            <label for="monthMinSelect">Start month : </label>
+            <div id="monthMinSelect"></div>
+            <!-- <br> -->
+            <label for="monthMaxSelect">End month : </label>
+            <div id="monthMaxSelect"></div>
+            <br>
+            <label for="statSelect">Stat : </label>
+            <div id="statSelect"></div>
+            <br>
+            <label for="groupSelect">Station Group(s) : </label>
+            <div id="groupSelect"></div>
+         </div>
+         <div id="Legend"></div>
+      </div>
+      <div id="plotArea"></div>
+      <script>
+         var dojoConfig = {
+            async: true,
+            packages: [{
+               name: "vaqum",
+               location: location.pathname.replace(/[^/]*\/[^/]*\/[^/]*$/, '') + 'dojo'
+            }]
+         };
+      </script>
+      <script src="/dojo/dojo/dojo.js"></script>
+      <script src="../svg2png.js"></script>
+      <script>
+         require([
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dojo/_base/window",
+            "dojo/io-query",
+            "dojo/hash",
+            "dojo/topic",
+            "dojo/_base/lang",
+            "dojo/request",
+            "dojo/store/Memory",
+            "dijit/form/FilteringSelect",
+            "dojox/form/CheckedMultiSelect",
+            "vaqum/monthlyStatCharts",
+            "dojo/domReady!"
+         ], function(dom, domConstruct, win, ioQuery, hash, topic, lang, request, Memory, FilteringSelect, CheckedMultiSelect, MonthlyStatCharts, query, registry) {
+            var charts;
+
+            var pageQuery = ioQuery.queryToObject(hash());
+
+            var monthlyStatConfig = pageQuery.monthlyStatConfig;
+            var region = pageQuery.region;
+            var stat = pageQuery.stat;
+            var forecastDay;
+            var monthMin;
+            var monthMax;
+
+            var firstLoad = true;
+            var groupOptions = [];
+
+            charts = new MonthlyStatCharts(monthlyStatConfig, dom.byId("plotArea"));
+
+            var regionStore = new Memory();
+            var forecastDayStore = new Memory();
+            var monthStore = new Memory();
+
+            var statStore = new Memory({
+               data: [
+                  {id:"aqpi", name:"aqpi"},
+                  {id:"avgX", name:"avgX"},
+                  {id:"avgY", name:"avgY"},
+                  {id:"corr", name:"corr"},
+                  {id:"count", name:"count"},
+                  {id:"fac2", name:"fac2"},
+                  {id:"fb", name:"fb"},
+                  {id:"mbias", name:"mbias"},
+                  {id:"nmb", name:"nmb"},
+                  {id:"nmge", name:"nmge"},
+                  {id:"rmse", name:"rmse"},
+                  {id:"stdX", name:"stdX"},
+                  {id:"stdY", name:"stdY"},
+                  {id:"urmse", name:"urmse"},
+                  {id:"varX", name:"varX"},
+                  {id:"varY", name:"varY"}
+               ]
+            });
+
+
+            function updateCharts(hash) {
+               var query = ioQuery.queryToObject(hash);
+               if ( query.monthlyStatConfig && query.region && query.forecastDay && query.monthMin && query.monthMax && query.stat ) {
+                  charts.update(query.monthlyStatConfig, query.region, query.forecastDay, query.monthMin, query.monthMax, query.stat, groupSel.value);
+
+                  regionSel.set('value', query.region, false);
+                  forecastDaySel.set('value', query.forecastDay, false);
+                  monthMinSel.set('value', query.monthMin, false);
+                  monthMaxSel.set('value', query.monthMax, false);
+                  statSel.set('value', query.stat, false);
+               }
+            }
+
+
+            function changeSelection() {
+               if (monthlyStatConfig && region && forecastDay && monthMin && monthMax && stat) {
+
+                  var requestedParams = {
+                     monthlyStatConfig: monthlyStatConfig,
+                     region: region,
+                     forecastDay: forecastDay,
+                     monthMin: monthMin,
+                     monthMax: monthMax,
+                     stat: stat
+                  };
+
+                  hash(ioQuery.objectToQuery(requestedParams));
+               }
+            }
+
+
+            function onRegionChange(newRegion) {
+               region = newRegion;
+               changeSelection();
+            }
+
+
+            function onForecastDayChange(newForecastDay) {
+               forecastDay = newForecastDay;
+               changeSelection();
+            }
+
+
+            function onStatChange(newStat) {
+               stat = newStat;
+               changeSelection();
+            }
+
+            function onGroupChange(newGroup) {// TODO
+               group = newGroup;
+               changeSelection();
+            }
+
+            function onMonthMinChange(newMonthMin) {
+               // TODO : Check that the min isn't bigger than the max before changing the selection
+               monthMin = newMonthMin;
+               updateGroupLists();
+               changeSelection();
+            }
+
+
+            function onMonthMaxChange(newMonthMax) {
+               // TODO : Check that the max isn't smaller than the min before changing the selection
+               monthMax = newMonthMax;
+               updateGroupLists();
+               changeSelection();
+            }
+
+            // update station groups available for the months
+            function updateGroupLists() {
+               // skip first load due to both monthMin and monthMax updating at the same time in the beginning
+               if (firstLoad) {
+                  firstLoad = false;
+                  return;
+               }
+
+               request.get(
+                  "../../rodb/monthlyStatGroup",
+                  {
+                     handleAs: "json",
+                     query: {
+                        monthlyStatConfig: monthlyStatConfig,
+                        monthMin: monthMin,
+                        monthMax: monthMax
+                     }
+                  }
+               ).then(lang.hitch(this, function(result) {
+                  var oldSelected = groupSel.value;
+                  // clean up old options
+                  groupOptions.forEach( function(option) {
+                     groupSel.removeOption(option);
+                  });
+                  groupOptions.length = 0; // empty list
+
+                  result.forEach(function (item) {
+                     let selectString = item.id + ' - ' + item.description;
+
+                     var c = win.doc.createElement('option');
+                     c.innerHTML = selectString;
+                     c.value = item.id;
+
+                     var groupIsSelected = oldSelected.length > 0 ? oldSelected.includes(c.value) : c.value === '7';
+                     if (groupIsSelected) {
+                        c.selected = true;
+                     }
+
+                     groupSel.addOption(c);
+                     groupOptions.push(c); // keep list of options
+                  });
+
+                  groupSel.set('disabled', (0 == result.length));
+               }));
+            }
+
+            function onGroupChange(isChecked) { // receives array of selected values for multiselect
+               if (charts) {
+                  groupOptions.forEach( function(option) {
+                     if ( isChecked.includes(option.value) ) {
+                        charts.updateGroupVisibility(option.value, true);
+                     } else {
+                        charts.updateGroupVisibility(option.value, false);
+                     }
+                  });
+               }
+            }
+
+
+            var regionSel = new FilteringSelect({
+               store: regionStore,
+               searchAttr: 'name',
+               style: 'width: 32em;',
+               disabled: true,
+               onChange: onRegionChange
+            }, "regionSelect");
+
+
+            var forecastDaySel = new FilteringSelect({
+               store: forecastDayStore,
+               searchAttr: 'name',
+               onChange: onForecastDayChange
+            }, "forecastDaySelect");
+
+
+            var monthMinSel = new FilteringSelect({
+               store: monthStore,
+               searchAttr: 'month',
+               onChange: onMonthMinChange
+            }, "monthMinSelect");
+
+            var monthMaxSel = new FilteringSelect({
+               store: monthStore,
+               searchAttr: 'month',
+               onChange: onMonthMaxChange
+            }, "monthMaxSelect");
+
+
+            var statSel = new FilteringSelect({
+               store: statStore,
+               searchAttr: 'name',
+               onChange: onStatChange
+            }, "statSelect");
+
+
+            var groupSel = new CheckedMultiSelect({
+               // dropDown: true, // does not work, this.dropDownButton is undefined in dojo class...
+               multiple: 'true',
+               hidden: 'true', // ugly hack to hide the empty scroll wheel TODO find out why options aren't part of the scroll wheel
+               onChange: onGroupChange,
+            }, "groupSelect");
+
+
+            request.get(
+               "../../rodb/monthlyStatConfig",
+               {
+                  handleAs: "json",
+                  query: {
+                     id: monthlyStatConfig
+                  }
+               }
+            ).then(lang.hitch(this, function(reply) {
+               this.variables = reply.variables;
+
+               regionStore.setData(reply.regions);
+
+               reply.forecastDays.forEach(function (forecastDay) {
+                  forecastDayStore.add({"id": forecastDay, "name": forecastDay});
+               });
+               if (forecastDay === undefined) {
+                  forecastDay = forecastDayStore.data[0].id;
+               }
+               forecastDaySel.set('value', forecastDay);
+
+               if (reply.regions.length > 0) {
+                  if (region === undefined) {
+                     region = regionStore.data[0].id;
+                  }
+                  regionSel.set('value', region);
+               }
+               regionSel.set('disabled', (0 == reply.regions.length));
+            }));
+
+
+            request.get(
+               "../../rodb/monthlyStatMonth",
+               {
+                  handleAs: "json",
+                  query: {
+                     monthlyStatConfig: monthlyStatConfig
+                  }
+               }
+            ).then(lang.hitch(this, function(reply) {
+               reply.forEach(function (item) {
+                  monthStore.add({id: item, month: item});
+               });
+               monthMax = monthStore.data[0].id;
+               monthMaxSel.set('value', monthMax);
+
+               if (monthStore.data.length > 60) {
+                  monthMin = monthStore.data[59].id;
+               } else {
+                  monthMin = monthStore.data[monthStore.data.length - 1].id;
+               }
+               monthMinSel.set('value', monthMin);
+            }));
+
+
+            window.addEventListener('resize', function(evt) {
+               var plotAreaNode = dom.byId("plotArea");
+               charts.resize(charts, plotAreaNode.clientWidth);
+            });
+
+            statSel.set('value', 'aqpi');
+
+            topic.subscribe("/dojo/hashchange", updateCharts);
+         });
+      </script>
+   </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "wms-time",
+  "dependencies": {
+    "ol": "6.1.1"
+  },
+  "devDependencies": {
+    "parcel": "1.11.0"
+  },
+  "scripts": {
+    "start": "parcel WMS-Time.html",
+    "build": "parcel build --experimental-scope-hoisting --public-url . WMS-Time.html"
+  }
+}

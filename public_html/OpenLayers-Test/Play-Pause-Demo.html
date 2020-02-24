@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta http-equiv="Cache-control" content="public">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<head>
+  <title>Play Pause Demo</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style.css">
+  <script src='./v6.1.1-dist/ol.js'></script>
+  <link rel="stylesheet" href="./v6.1.1-dist/ol.css">
+  <style>
+    .map {
+        height: 900px;
+        width: 1900px;
+      }
+  </style>
+</head>
+<body>
+<div class="container text-center">
+  <div class="row">
+    <div class="container col-sm-6">
+      <center>
+      <h2>Play-Pause Demo on GDPS.ETA_TT Layer</h2>
+      <div id="map" class="map"></div>
+      <div role="group" aria-label="Animation controls">
+      <button id="play" type="button">Play</button>
+      <button id="pause" type="button">Pause</button>
+      <span id="info"></span>
+      </center>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+
+function now() 
+{
+    var date = new Date(Date.now());
+    return roundMinutes(date);
+}
+
+function roundMinutes(date) 
+{
+    var hours = ((Math.floor(date.getHours() / 3)) * 3 + 1)
+    date.setHours(hours);
+    date.setMinutes(0);
+    date.setSeconds(0);
+
+    return date;
+}
+
+var startDate = now();
+var frameRate = 1.0;
+var animationId = null;
+
+var layers = 
+[
+    new ol.layer.Tile({
+        source: new ol.source.OSM()
+    }),
+    new ol.layer.Image({
+        opacity: 0.5,
+        source: new ol.source.ImageWMS({
+            url: 'https://geo.weather.gc.ca/geomet',
+            params: {'LAYERS': 'GDPS.ETA_TT'},
+            ratio: 1,
+            serverType: 'mapserver'
+        })
+    })
+]
+
+var map = new ol.Map
+({
+    target: 'map',
+    layers: layers,
+    view: new ol.View({
+        center: ol.proj.fromLonLat([45, 40]),
+        zoom: 4
+    })
+});
+
+function updateInfo() 
+{
+    var el = document.getElementById('info');
+    el.innerHTML = startDate.toISOString().split('.')[0]+"Z";
+}
+
+function setTime() 
+{
+    startDate.setHours(startDate.getHours() + 3);
+    var seconds = now().getTime() + 432000000;
+    if (startDate.getTime() > seconds) 
+    {
+        startDate = now();
+    }
+    layers[1].getSource().updateParams({'TIME': startDate.toISOString().split('.')[0]+"Z"});
+    updateInfo();
+}
+
+var stop = function() 
+{
+    if (animationId !== null) 
+    {
+        window.clearInterval(animationId);
+        animationId = null;
+    }
+};
+
+var play = function() 
+{
+    stop();
+    animationId = window.setInterval(setTime, 1000 / frameRate);
+};
+
+var startButton = document.getElementById('play');
+startButton.addEventListener('click', play, false);
+
+var stopButton = document.getElementById('pause');
+stopButton.addEventListener('click', stop, false);
+
+updateInfo();
+</script>
+</body>
+</html>

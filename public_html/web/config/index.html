@@ -1,0 +1,589 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>VAQUM</title>
+   <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css">
+</head>
+
+
+<body class="claro">
+   <a href="../tableViewer.html">Afficher le contenu des tables</a>
+   <span data-dojo-type="dojo/store/Memory" data-dojo-id="integrationStore" data-dojo-props="idProperty:'datestart'"></span>
+
+   <script>/*This empty script tag is essential to make Dojo's injection mechanism work properly*/</script>
+
+   <div id="appBody">
+      <div>
+         <label for="serieBaseSelect">Série de base : </label>
+         <span data-dojo-type="vaqum/jsonStore" data-dojo-id="serieStore"
+            data-dojo-props="target: '../db/serie/'"></span>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="value:'', store:serieStore, searchAttr:'display', onChange:onSerieChange, queryExpr:'*${0}*'"
+            name="serieBaseSelect"
+            id="serieBaseSelect">
+         <button name="addSerieBase" id="addSerieBase" data-dojo-type="dijit.form.Button" type="button">+
+            <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+               dijit.byId("addSerieDialog").show();
+            </script>
+         </button>
+         <button name="loadBase" id="loadBase" data-dojo-type="dijit.form.Button" type="button" data-dojo-props="disabled:true">Charger des prévisions
+            <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+               dijit.byId("serieId").set('value', dijit.byId("serieBaseSelect").value);
+               dijit.byId("loadSerieName").set('value', dijit.byId("serieBaseSelect").displayedValue);
+               dijit.byId("serieNameDisplay").set('value', dijit.byId("serieBaseSelect").displayedValue);
+               dijit.byId("loadForecastDialog").show();
+            </script>
+         </button>
+         <br>
+         <label for="serieTestSelect">Série test : </label>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="store:serieStore, searchAttr:'display', onChange:onSerieChange, queryExpr:'*${0}*'"
+            name="serieTestSelect"
+            id="serieTestSelect">
+         <button name="addSerieTest" id="addSerieTest" data-dojo-type="dijit.form.Button" type="button">+
+            <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+               dijit.byId("addSerieDialog").show();
+            </script>
+         </button>
+         <button name="loadTest" id="loadTest" data-dojo-type="dijit.form.Button" type="button" data-dojo-props="disabled:true">Charger des prévisions
+            <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+               dijit.byId("serieId").set('value', dijit.byId("serieTestSelect").value);
+               dijit.byId("loadSerieName").set('value', dijit.byId("serieTestSelect").displayedValue);
+               dijit.byId("serieNameDisplay").set('value',  dijit.byId("serieTestSelect").displayedValue);
+               dijit.byId("loadForecastDialog").show();
+            </script>
+         </button>
+      </div>
+      <div>
+         <label for="intDebutSelect">Début : </label>
+         <input data-dojo-type="dijit/form/FilteringSelect"
+            data-dojo-props="value:'', store:integrationStore, searchAttr:'datestart', disabled: true, onChange:onIntChange"
+            name="intDebutSelect"
+            id="intDebutSelect">
+         <label for="intFinSelect">Fin : </label>
+         <input data-dojo-type="dijit/form/FilteringSelect"
+            data-dojo-props="value:'', store:integrationStore, searchAttr:'datestart', disabled: true, onChange:onIntChange"
+            name="intFinSelect"
+            id="intFinSelect">
+      </div>
+      <div>
+         <label for="integrationOffset">Décalage des intégrations de test (h): </label>
+         <input type="text" name="integrationOffset" id="integrationOffset"
+            data-dojo-type="dijit.form.NumberTextBox"
+            data-dojo-props="trim:true, required:true, value:0">
+      </div>
+      <div>
+         <button name="createComparison" id="createComparison" data-dojo-type="dijit.form.Button" type="button" data-dojo-props="disabled:true">Créer une comparaison
+            <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+               require(["dojo/request/xhr"], function(xhr) {
+                  var reply = confirm("Ceci va lancer le calcul des statistiques sur aqdb.cmc.ec.gc.ca.  Êtes-vous certain de vouloir continuer?");
+                  if (reply == true) {
+                     xhr.post("addComparison.php",
+                        {
+                           handleAs: "text",
+                           data: {
+                              baseSerie: dijit.byId("serieBaseSelect").value,
+                              testSerie: dijit.byId("serieTestSelect").value,
+                              dateBegin: dijit.byId("intDebutSelect").value,
+                              dateEnd: dijit.byId("intFinSelect").value,
+                              integrationOffset: dijit.byId("integrationOffset").value
+                           }
+                        }
+                     ).then(
+                        function(result) {
+                           alert(result);
+                        },
+                        function(err) {
+                           console.log("XHR POST to addComparison.php Failed!");
+                           console.log(err);
+                           alert("Erreur : Incapable de communiquer avec le serveur!");
+                        }
+                     );
+                  }
+               });
+            </script>
+         </button>
+      </div>
+   </div>
+
+
+<!-- =============================== DIALOGS =============================== -->
+
+
+   <div id="addSerieDialog" data-dojo-type="dijit/Dialog" title="Ajouter une série">
+      <form dojoType="dijit/form/Form" id="addSerieForm" name="addSerieForm">
+         <label for="seriName">Nom : </label>
+         <br>
+         <input type="text" name="serieName" id="serieName"
+            data-dojo-type="dijit.form.ValidationTextBox"
+            data-dojo-props="trim:true, required:true">
+         <br>
+         <div data-dojo-type="vaqum/jsonStore"
+            data-dojo-id="modelStore"
+            data-dojo-props="target: '../db/model/'"></div>
+         <label for="modelSelect">Model : </label>
+         <br>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="value:'', store:modelStore, searchAttr:'name'"
+            name="modelSelect"
+            id="modelSelect">
+         <button data-dojo-type="dijit.form.Button" type="button">+
+            <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+               dijit.byId("addModelDialog").show();
+            </script>
+         </button>
+         <br>
+         <label for="gridSelect">Grille : </label><div data-dojo-type="vaqum/jsonStore"
+            data-dojo-id="gridStore"
+            data-dojo-props="target: '../db/grid/'"></div>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="value:'', store:gridStore, searchAttr:'name'"
+            name="gridSelect"
+            id="gridSelect">
+         <button name="addGrid" id="addGrid" data-dojo-type="dijit.form.Button" type="button">+
+            <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+               dijit.byId("addGridDialog").show();
+            </script>
+         </button>
+         <br>
+         <label for="snapshotSelect">Snapshot : </label>
+         <div data-dojo-type="vaqum/jsonStore"
+            data-dojo-id="snapshotStore"
+            data-dojo-props="target: '../db/stationSnapshot/', errorHandler:'handleStoreError()'"></div>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="store:snapshotStore, searchAttr:'creationdate'"
+            name="snapshotSelect"
+            id="snapshotSelect">
+         <button name="addSnapshot" id="addSnapshot" data-dojo-type="dijit.form.Button" type="button">+
+            <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+               dijit.byId("addSnapshotDialog").show();
+            </script>
+         </button>
+         <br>
+         <label for="interpolationSelect">Interpolation : </label>
+         <div data-dojo-type="vaqum/jsonStore"
+            data-dojo-id="interpolationStore"
+            data-dojo-props="target: '../db/interpolation/', errorHandler:'handleStoreError()'"></div>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="store:interpolationStore, searchAttr:'name'"
+            name="interpolationSelect"
+            id="interpolationSelect">
+         <br>
+         <label for="implementationSelect">Implémentation par défaut (optionnel) : </label>
+         <br>
+         <div data-dojo-type="vaqum/jsonStore"
+            data-dojo-id="implementationStore"
+            data-dojo-props="target: '../db/implementation/'"></div>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="value:'', store:implementationStore, searchAttr:'name', required: false"
+            name="implementationSelect"
+            id="implementationSelect">
+         <br>
+         <label for="serieDescription">Description : </label>
+         <br>
+         <textarea id="serieDescription" name="serieDescription"
+            data-dojo-type="dijit.form.Textarea" style="width:40em"
+            data-dojo-props="required:true"></textarea>
+         <br>
+         <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" type="button">Annuler
+               <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+                  dijit.byId("addSerieDialog").hide();
+                  dijit.byId("addSerieForm").reset();
+               </script>
+            </button>
+            <button data-dojo-type="dijit.form.Button" type="button">OK
+               <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+                  if ( dijit.byId("addSerieForm").validate() &&
+                       dijit.byId("serieDescription").value.length > 0) {
+                     var implVal = dijit.byId("implementationSelect").value;
+                     var impl = "NULL";
+                     if ( implVal != "" ) {
+                        impl = implVal;
+                     }
+                     serieStore.add({
+                        name:dijit.byId("serieName").value,
+                        model:dijit.byId("modelSelect").value,
+                        grid:dijit.byId("gridSelect").value,
+                        stationsnapshot:dijit.byId("snapshotSelect").value,
+                        interpolation:dijit.byId("interpolationSelect").value,
+                        currentimplementation:impl,
+                        description:dijit.byId("serieDescription").value
+                     });
+                     dijit.byId("addSerieDialog").hide();
+                     dijit.byId("addSerieForm").reset();
+                  }
+               </script>
+            </button>
+         </div>
+      </form>
+   </div> <!-- addSerieDialog -->
+
+
+   <div id="loadForecastDialog" data-dojo-type="dijit/Dialog" title="Charger des prévisions">
+      <form dojoType="dijit/form/Form" id="loadForecastForm" name="loadForecastForm" action="loadForecast.php" method="post">
+         <input type="hidden" id="serieId" name="serieId" data-dojo-type="dijit.form.TextBox">
+         <input type="hidden" id="loadSerieName" name="loadSerieName" data-dojo-type="dijit.form.TextBox">
+         <label for="serieNameDisplay">Nom : </label>
+         <br>
+         <input type="text" id="serieNameDisplay" name="serieNameDisplay" data-dojo-type="dijit.form.TextBox" data-dojo-props="disabled:true">
+         <br>
+         <label for="implementationId">Implémentation (optionnel) : </label>
+         <br>
+         <input data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="value:'', store:implementationStore, searchAttr:'name', required: false"
+            name="implementationId"
+            id="implementationId">
+         <br>
+         <label for="filePattern">Chemin d'accès des fichiers (<i>glob pattern</i>) : </label>
+         <br>
+         <input type="text" id="filePattern" name="filePattern" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:50em;">
+         <br>
+         <label for="surfaceLevel">Niveau de la surface : </label>
+         <br>
+         <input type="text" id="surfaceLevel" name="surfaceLevel" data-dojo-type="dijit.form.NumberTextBox" data-dojo-props="required:true, value:'95369037'">
+         <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" type="button">Annuler
+               <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+                  dijit.byId("loadForecastForm").reset();
+                  dijit.byId("surfaceLevel").set('value', 95369037);
+                  dijit.byId("loadForecastDialog").hide();
+               </script>
+            </button>
+            <button data-dojo-type="dijit.form.Button" type="button">OK
+               <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+                  function validateLoadForecastForm() {
+                     var valid = true;
+                     valid = valid && dijit.byId("filePattern").isValid();
+                     valid = valid && dijit.byId("surfaceLevel").isValid();
+                     return valid;
+                  }
+
+                  if ( validateLoadForecastForm() ) {
+                     require(["dojo/request/xhr"],
+                        function(xhr) {
+                           xhr.post("loadForecast.php", {
+                              handleAs: "text",
+                              data: {
+                                 serieId: dijit.byId("serieId").get('value'),
+                                 implementationId: dijit.byId("implementationId").get('value'),
+                                 loadSerieName: dijit.byId("loadSerieName").get('value'),
+                                 surfaceLevel: dijit.byId("surfaceLevel").get('value'),
+                                 filePattern: dijit.byId("filePattern").get('value')
+                              }
+                           }).then(function(result) {
+                              alert(result);
+                              dijit.byId("loadForecastForm").reset();
+                              dijit.byId("surfaceLevel").set('value', 95369037);
+                              dijit.byId("loadForecastDialog").hide();
+                           }, function(err) {
+                              console.log("XHR POST to loadForecast.php failed!");
+                              console.log(err);
+                              alert("Erreur : Incapable de communiquer avec le serveur!");
+                           });
+                     });
+                  }
+               </script>
+            </button>
+         </div>
+      </form>
+   </div> <!-- loadForecastDialog -->
+
+   <div id="addExecutableDialog" data-dojo-type="dijit/Dialog" title="Ajouter un exécutable">
+      <form dojoType="dijit/form/Form" id="addExecutableForm" name="addExecutableForm">
+         <label for="excutableModelSelect">Modèle : </label>
+         <br>
+         <div data-dojo-type="vaqum/jsonStore"
+            data-dojo-id="modelStore"
+            data-dojo-props="target: '../db/model/'"></div>
+         <input id="excutableModelSelect" name="excutableModelSelect"
+            data-dojo-type="dijit.form.FilteringSelect"
+            data-dojo-props="store:modelStore, searchAttr:'name'">
+         <button data-dojo-type="dijit.form.Button" type="button">+
+            <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+               dijit.byId("addModelDialog").show();
+            </script>
+         </button>
+         <br>
+         <label for="executableSvnPath">URI SVN : </label>
+         <br>
+         <input type="text" id="executableSvnPath" name="executableSvnPath" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:50em;">
+         <br>
+         <label for="executableSvnRev">Révision SVN : </label>
+         <br>
+         <input type="text" id="executableSvnRev" name="executableSvnRev" data-dojo-type="dijit.form.NumberTextBox" data-dojo-props="required:true" style="width:8em;">
+         <br>
+         <label for="executableHost">Hôte sur lequel à été compilé l'exécutable : </label>
+         <br>
+         <input type="text" id="executableHost" name="executableHost" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:32em;">
+         <br>
+         <label for="executableDescription">Description : </label>
+         <br>
+         <textarea id="executableDescription" name="executableDescription"
+            data-dojo-type="dijit.form.Textarea" style="width:50em;"
+            data-dojo-props=""></textarea>
+         <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" type="button">Annuler
+               <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+                  dijit.byId("addExecutableForm").reset();
+                  dijit.byId("addExecutableDialog").hide();
+               </script>
+            </button>
+            <button data-dojo-type="dijit.form.Button" type="button">OK
+               <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+                  if ( dijit.byId("addExecutableForm").validate() ) {
+                     executableStore.add({
+                        model:dijit.byId("excutableModelSelect").value,
+                        svnpath:dijit.byId("executableSvnPath").value,
+                        svnrevision:dijit.byId("executableSvnRev").value,
+                        buildhost:dijit.byId("executableHost").value,
+                        comment:dijit.byId("executableDescription").value,
+                     }).then(function(result) {
+                        dijit.byId("addExecutableForm").reset();
+                        dijit.byId("addExecutableDialog").hide();
+                     });
+                  }
+               </script>
+            </button>
+         </div>
+      </form>
+   </div> <!-- addExecutableDialog -->
+
+
+   <div id="addModelDialog" data-dojo-type="dijit/Dialog" title="Ajouter un modèle">
+      <form dojoType="dijit/form/Form" id="addModelForm" name="addModelForm" action="" method="post">
+         <label for="modelName">Nom du modèle : </label>
+         <br>
+         <input type="text" id="modelName" name="modelName" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:16em;">
+         <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" type="button">Annuler
+               <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+                  dijit.byId("addModelForm").reset();
+                  dijit.byId("addModelDialog").hide();
+               </script>
+            </button>
+            <button data-dojo-type="dijit.form.Button" type="button">OK
+               <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+                  if ( dijit.byId("modelName").validate() ) {
+                     modelStore.add({
+                        name:dijit.byId("modelName").value,
+                     });
+                     dijit.byId("addModelForm").reset();
+                     dijit.byId("addModelDialog").hide();
+                  }
+               </script>
+            </button>
+         </div>
+      </form>
+   </div> <!-- addModelDialog -->
+
+   <div id="addInventoryDialog" data-dojo-type="dijit/Dialog" title="Ajouter un inventaire d'émissions">
+      <form dojoType="dijit/form/Form" id="addInventoryForm" name="addInventoryForm" action="" method="post">
+         <label for="inventoryName">Nom de l'inventaire d'émissions : </label>
+         <br>
+         <input type="text" id="inventoryName" name="inventoryName" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:16em;">
+         <br>
+         <label for="inventoryDescription">Description : </label>
+         <br>
+         <textarea id="inventoryDescription" name="inventoryDescription"
+            data-dojo-type="dijit.form.Textarea" style="width:50em;"
+            data-dojo-props="required:true"></textarea>
+         <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" type="button">Annuler
+               <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+                  dijit.byId("addInventoryForm").reset();
+                  dijit.byId("addInventoryDialog").hide();
+               </script>
+            </button>
+            <button data-dojo-type="dijit.form.Button" type="button">OK
+               <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+                  if ( dijit.byId("addInventoryForm").validate() ) {
+                     inventoryStore.add({
+                        name:dijit.byId("inventoryName").value,
+                        description:dijit.byId("inventoryDescription").value
+                     });
+                     dijit.byId("addInventoryForm").reset();
+                     dijit.byId("addInventoryDialog").hide();
+                  }
+               </script>
+            </button>
+         </div>
+      </form>
+   </div> <!-- addInventoryDialog -->
+
+   <div id="addGridDialog" data-dojo-type="dijit/Dialog" title="Charger une grille">
+      <form dojoType="dijit/form/Form" id="addGridForm" name="addGridForm">
+         <label for="gridName">Nom de la grille : </label>
+         <br>
+         <input type="text" id="gridName" name="gridName" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:16em;">
+         <br>
+         <label for="gridName">Chemin d'accès d'un fichier RPN dans lequel la grille est définie : </label>
+         <br>
+         <input type="text" id="gridFilePath" name="gridFilePath" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:50em;">
+         <br>
+         <label for="fieldVarName">Nom d'un champs définie sur la grille : </label>
+         <br>
+         <input type="text" id="fieldVarName" name="fieldVarName" data-dojo-type="dijit.form.ValidationTextBox" data-dojo-props="required:true" style="width:4em;">
+         <br>
+         <label for="gridDescription">Description : </label>
+         <br>
+         <textarea id="gridDescription" name="gridDescription"
+            data-dojo-type="dijit.form.Textarea" style="width:50em;"
+            data-dojo-props="required:true"></textarea>
+         <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" type="button">Annuler
+               <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+                  dijit.byId("addGridDialog").hide();
+               </script>
+            </button>
+            <button data-dojo-type="dijit.form.Button" type="button">OK
+               <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+                  if ( dijit.byId("addGridForm").validate() ) {
+                     require(["dojo/request/xhr"],
+                        function(xhr) {
+                           xhr.post("loadGrid.php", {
+                                 handleAs: "text",
+                                 data: {
+                                    gridName: dijit.byId("gridName").get('value'),
+                                    gridFilePath: dijit.byId("gridFilePath").get('value'),
+                                    fieldVarName: dijit.byId("fieldVarName").get('value'),
+                                    gridDescription: dijit.byId("gridDescription").get('value')
+                                 }
+                           }).then( function(result) {
+                                 alert(result);
+                                 dijit.byId("addGridForm").reset();
+                                 dijit.byId("addGridDialog").hide();
+                              },
+                              function(err) {
+                                 console.log("XHR POST to loadGrid.php failed!");
+                                 console.log(err);
+                                 alert("Erreur : Incapable de communiquer avec le serveur!");
+                              }
+                           );
+                     });
+                  }
+               </script>
+            </button>
+         </div>
+      </form>
+   </div> <!-- addGridDialog -->
+
+
+   <div id="addSnapshotDialog" data-dojo-type="dijit/Dialog" title="Créer un nouveau snapshot des stations">
+      <form dojoType="dijit/form/Form" id="addSnapshotForm" name="addSnapshotForm">
+         <label for="snapshotDescription">Description : </label>
+         <br>
+         <textarea id="snapshotDescription" name="snapshotDescription"
+            data-dojo-type="dijit.form.Textarea" style="width:50em;"
+            data-dojo-props="required:true"></textarea>
+         <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" type="button">Annuler
+               <script type="dojo/method" data-dojo-event="onClick" data-dojo-args="evt">
+                  dijit.byId("addSnapshotDialog").hide();
+               </script>
+            </button>
+            <button data-dojo-type="dijit.form.Button" type="button">OK
+               <script type="dojo/on" data-dojo-event="click" data-dojo-args="evt">
+                  if ( dijit.byId("addSnapshotForm").validate() ) {
+                     snapshotStore.add({
+                        description:dijit.byId("snapshotDescription").value,
+                     }).then(function(result) {
+                        dijit.byId("addSnapshotForm").reset();
+                        dijit.byId("addSnapshotDialog").hide();
+                     });
+                  }
+               </script>
+            </button>
+         </div>
+      </form>
+   </div> <!-- addSnapshotDialog -->
+
+
+   <script>
+      dojoConfig = {
+         async: true,
+         parseOnLoad: false,
+         baseUrl: ".",
+         packages: [
+            { name: "dojo", location: "/dojo/dojo" },
+            { name: "dijit", location: "/dojo/dijit" },
+            { name: "dojox", location: "/dojo/dojox" },
+            { name: "vaqum", location: "../dojo" }
+         ],
+         isDebug: true
+      };
+   </script>
+   <script src="/dojo/dojo/dojo.js"></script>
+
+   <script>
+      function isNumber(something) {
+         return (something != "" && ! ( isNaN(something - 0) ));
+      }
+
+      function onIntChange() {
+         var intDebSel = dijit.byId("intDebutSelect");
+         var intFinSel = dijit.byId("intFinSelect");
+
+         if ( intDebSel.value <= intFinSel.value ) {
+            dijit.byId("createComparison").set('disabled', false);
+         } else {
+            dijit.byId("createComparison").set('disabled', true);
+         }
+      }
+
+
+      function onSerieChange() {
+         require(["dojo/request", "dijit/registry"],
+         function(request, registry) {
+            dijit.byId("createComparison").set('disabled', true);
+
+            var baseSerie = dijit.byId("serieBaseSelect").value;
+            dijit.byId("loadBase").set('disabled', !isNumber(baseSerie));
+
+            var testSerie = dijit.byId("serieTestSelect").value;
+            dijit.byId("loadTest").set('disabled', !isNumber(testSerie));
+
+            if ( isNumber(baseSerie) && isNumber(testSerie) ) {
+               if (baseSerie != testSerie) {
+                  request.get(
+                     "../rodb/integration/",
+                     {
+                        handleAs: "json",
+                        query: {
+                           base: baseSerie,
+                           test: testSerie
+                        }
+                     }
+                  ).then(function(result) {
+                     integrationStore.setData(result);
+                     var state = integrationStore.data.length === 0;
+                     var intDebSel = dijit.byId("intDebutSelect");
+                     var intFinSel = dijit.byId("intFinSelect");
+                     intDebSel.set('disabled', state);
+                     intFinSel.set('disabled', state);
+                  });
+               } else {
+                  dijit.byId("intDebutSelect").set('disabled', true);
+                  dijit.byId("intFinSelect").set('disabled', true);
+               }
+
+            }
+         });
+      }
+   </script>
+
+   <script>
+      // load requirements for declarative widgets in page content
+      require(["dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dijit/Dialog", "dijit/form/Form", "dijit/form/Button", "dijit/form/TextBox", "dijit/form/ValidationTextBox", "dijit/form/NumberTextBox", "dijit/form/Textarea", "dojo/on", "dojo/query", "vaqum/jsonStore", "dojox/validate/web", "dojo/domReady!"]);
+
+      require(["dojo/parser", "dojo/ready"], function(parser, ready){
+         ready(function(){
+            parser.parse();
+         });
+      });
+   </script>
+
+</body>
+</html>

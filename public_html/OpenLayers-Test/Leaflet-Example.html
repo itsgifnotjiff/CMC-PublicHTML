@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html>
+    <head>
+ 
+	<title> Leaflet geomet model-CMC v6 </title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">	
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.1/dist/leaflet.timedimension.control.min.css" />
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/iso8601-js-period@0.2.1/iso8601.min.js"></script>
+		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.1/dist/leaflet.timedimension.min.js"></script>
+
+<!-- 		<script src="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/proj4.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/proj4leaflet.js"></script>  -->
+		
+<!--		<script src="https://kit.fontawesome.com/yourcode.js"></script>
+             Get your code at fontawesome.com-->
+		
+
+<style>
+ /*
+*, *::before, *::after {box-sizing: border-box;}
+
+body {
+  margin: 0;
+}
+
+*/
+
+ body {  background-color: lightgrey; }
+ 
+ 
+ /* The side menu */
+.sidenav {
+  height: 100%; /* 100% Full-height */
+  width: 0; /* 0 width - change this with JavaScript */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Stay on top */
+  top: 0; /* Stay at the top */
+  left: 0;
+  background-color: white;
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 40px; /* Place content 40px from the top */
+  padding-left: 5px;
+  transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+  display: flex;
+  flex-direction: column;
+  margin-top:7px;
+}
+
+/* The menu  */
+.sidenav a  {
+  /* padding: 4px 4px 2px 2px; */
+  text-decoration: none;
+  /* font-size: 20px; */
+  color: darkgrey;
+  transition: 0.5s;
+}
+
+.dropdown  {
+  font-size: 15px;
+  color: darkgrey;
+  display: block;
+  border: none;
+  overflow: hidden;
+  background-color: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.dropbtn {
+  font-size: 20px;
+  color: darkgrey;
+  display: block;
+  border: none;
+  background-color: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  padding: 3px;
+}
+
+.other_item_in_dropdown {
+  font-size: 20px;
+  color: darkgrey;
+  display: block;
+  border: none;
+  background-color: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  padding: 3px;
+}
+
+/* When you mouse over the menu option, change their look and color */
+.sidenav a:hover , .dropdown:hover .dropbtn {
+  color: black;
+  text-decoration-line:  underline;
+  text-decoration-style: solid;
+  background-color: #ddd;
+}
+
+/* Position and style the close button (top right corner) */
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 5px;
+  font-size: 36px;
+  margin-left: 20px;
+}
+	
+.affiche_model_et_couche {
+	z-index: 2; 
+    background-color: white;
+	padding: 2px 10px;
+	margin: 4px;
+	border: 2px solid lightgrey;
+	Color: black;
+	font-size:18px;
+	}
+/* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+
+.dropdown-content {
+  display: none;
+  /* position: absolute; */
+  background-color: #f9f9f9;
+  font-size: 18px;
+  box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  float: none;
+  color: black;
+  padding: 5px 5px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+/*
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+  margin-left: 5px;
+  z-index: 2;
+} 
+*/
+/* Optional: Style the caret down icon */
+.fa-caret-down {
+  float: right;
+  padding-right: 2px;
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+
+ #wms-wrapper {
+	transition: margin-left 1s;
+    width: calc(100vw - 40px);
+    height: calc(100vh - 100px);
+    z-index: 0;
+    border: 0px solid black;
+    } 
+	
+	 /*   width: 1200px;
+    height: 600px; */
+	
+#menu-wms-wrapper {
+    z-index: 0;
+	position: "topleft";
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+/*	outline: 2px solid black; */
+ /*   position: absolute;
+	left: 50px;
+	top: 10px;
+    border: 0px black; */
+	}
+
+#mapid-wrapper {
+ /* outline: 2px solid black;  */
+  height: 100%;
+  z-index: 0;
+}
+
+.mapid-sidnav-openers {
+	z-index: 3; 
+	position: absolute;
+	display: flex;
+	flex-direction: row;
+	left: 50px;
+	top: -10px;
+    border: 0px black; 
+}
+
+#mapid {
+    z-index: 1;
+    background-color: green;
+	height: 100%;
+}
+
+  .span_menu_wms {
+	z-index: 2; 
+	display: flex;
+	flex-direction: column;
+    background-color: white;
+	padding: 0px 5px;
+	margin: 0px;
+	border: 2px solid black;
+	font-size:16px;
+	text-align: center;
+  }
+  .span_menu_wms:hover {
+	background-color: lightgrey;
+	border: 2px solid black;
+  }
+  .menu-wms{
+        padding: 0px 0px 0px 0px;
+		margin: 0px 0px 5px 0px;
+		border: 0px;
+        border-radius: 1px;
+		border-color: solid black;
+		background-color: #f1f1f1;
+		color:black;
+        cursor: auto;
+        text-align: center;
+		font-size:18px;    
+    }
+.menu-wms:hover{
+		border-color: solid black;
+		background-color: white;
+		color:black;
+        cursor: auto; 
+		text-decoration-line:  underline;
+    }
+      /*
+        leaflet wms legend styling
+        ref: https://github.com/kartoza/leaflet-wms-legend
+    */
+    .leaflet-control-wms-legend{
+        display: block;
+        padding: 3px;
+        border-radius: 4px;
+		border-color: solid lightgrey;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
+        cursor: auto;
+        text-align: center;
+        background-color: #FFFFFF;
+    }
+
+    .leaflet-control-wms-legend:hover{
+        background-color: lightgrey;
+		border-color: solid black;
+    }
+/* _____________________________________________________________________________________________________________________________________________*/ 
+/* Responsive layout on various screens (larger than 2000px wide is UHD ) */
+ @media screen and (min-width: 2000px) {  
+
+
+  /* distinctive color of background for helping with debugging */
+  body {  background-color: lightblue; }
+  
+  #wms-wrapper {
+   /*   border: 2px solid black;  */
+	  width: calc(100vw - 20px);
+	  height: calc(100vh - 105px);
+    } 
+	
+   #mapid-wrapper {
+       border: 0px solid black;  
+    }
+
+.leaflet-control-wms-legend:hover {
+        background-color: lightblue;
+		border-color: solid black;
+    }
+}
+/* _____________________________________________________________________________________________________________________________________________*/
+/* Responsive layout on various screens (smaller than 767px wide is cell phone and some low res tablets in portrait ) */
+ @media screen and (max-width: 767px) { 
+
+	/* distinctive color of background for helping with debugging */
+    body {
+       background-color: lightyellow;
+    }
+  #wms-wrapper {
+       border: 0px solid black;
+	   width: calc(100vw - 40px);
+	   height: calc(100vh - 20px);
+    } 
+	
+	/*     width: 750px;
+    height: 500px; */
+	
+    #mapid-wrapper {
+       border: 0px solid black;  
+    }
+
+	.span_menu_wms {
+	padding: 0px 3px;
+	margin: 0px;
+	border: 1px solid black;
+	font-size:11px;
+	}
+	.menu-wms{
+        padding: 0px 0px 0px 0px;
+		margin: 0px 0px 3px 0px;
+		border: 0px;
+        border-radius: 1px;
+		font-size:10px;    
+    }
+	
+	      /*
+        leaflet wms legend styling
+        ref: https://github.com/kartoza/leaflet-wms-legend
+    */
+    .leaflet-control-wms-legend
+    {
+        display: block;
+        padding: 1px;
+        border-radius: 1px;
+		border-color: solid lightgrey;
+        -webkit-border-radius: 1px;
+        -moz-border-radius: 1px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.65);
+        cursor: auto;
+        text-align: center;
+        background-color: #FFFFFF;
+    }
+
+    .leaflet-control-wms-legend:hover
+    {
+        background-color: lightyellow;
+		border-color: solid black;
+    }
+
+/* the following (until end of timecontrol bar css)  is for the properties of external timecontrol feature */	
+	.leaflet-bar-timecontrol .leaflet-control-timecontrol
+	{float:left;height:26px;
+	 line-height:26px;border:solid #a5a5a5;
+	 background-color:#fff;border-width:0 1px 0 0
+	 }
+	.leaflet-bar-timecontrol .leaflet-control-timecontrol:first-child
+	{border-radius:4px 0 0 4px}
+	.leaflet-bar-timecontrol .leaflet-control-timecontrol:last-child
+	{border-radius:0 4px 4px 0}
+	.leaflet-bar-timecontrol .leaflet-control-timecontrol:before
+	{font-family:"Glyphicons Halflings";display:block}
+	.leaflet-bar-timecontrol .timecontrol-slider
+	{position:relative;width:auto;cursor:auto}
+	.leaflet-bar-timecontrol a.timecontrol-date,.leaflet-bar-timecontrol a.timecontrol-date:hover
+/*	{position:relative;min-width:150px;width:auto;padding:0 10px 0 20px;white-space:nowrap}  */
+    {position:relative;min-width:60px;width:auto;padding:0 5px 0 5px;white-space:nowrap; font-size: 75%;} 
+	.leaflet-bar-timecontrol a.timecontrol-date.utc,.leaflet-bar-timecontrol a.timecontrol-date.utc:hover
+/*	{min-width:185px}  */
+    {min-width:100px}
+	.leaflet-bar-timecontrol a.timecontrol-date.loading,.leaflet-bar-timecontrol a.timecontrol-date.loading:hover
+	{background-color:#ffefa4}
+	.leaflet-bar-timecontrol .timecontrol-dateslider .slider
+/*	{width:200px}  */
+    {width:100px}
+	.leaflet-bar-timecontrol .timecontrol-speed
+	{white-space:nowrap;cursor:auto}
+	.leaflet-bar-timecontrol .timecontrol-speed .slider
+/*	{width:55px;display:inline-block}  */
+    {width:35px;display:inline-block}
+	.leaflet-bar-timecontrol .timecontrol-speed .speed
+/*	{width:55px;display:inline-block;float:left;text-align:right}   */
+    {width:35px;display:inline-block;float:left;text-align:right}
+	.leaflet-bar-timecontrol .timecontrol-play,.leaflet-bar-timecontrol .timecontrol-play:hover
+	{position:relative}
+	.leaflet-bar-timecontrol .timecontrol-play span
+	{font-size:10px}.leaflet-bar-timecontrol a.timecontrol-play.loading
+	{background-color:#ffefa4}.timecontrol-slider .slider
+	{position:relative;height:12px;margin:6px;border:1px solid #a5a5a5;cursor:pointer}
+/*	.timecontrol-slider .slider.has-limits{margin-left:15px;margin-right:15px;background-color:#ddd}  */
+    .timecontrol-slider .slider.has-limits{margin-left:5px;margin-right:5px;background-color:#ddd}
+	.timecontrol-slider .slider.has-limits .range{position:absolute;height:10px;background-color:#fff}
+	.timecontrol-slider .knob
+	{position:absolute;width:8px;height:22px;background-color:#ddd;
+	border-radius:2px;border:1px solid #a5a5a5;margin-top:-6px;margin-left:-4px;
+	cursor:ew-resize;cursor:-webkit-grab;cursor:-moz-grab
+	}
+	.timecontrol-slider .knob:after
+	{content:' ';display:block;position:absolute;
+	width:20px;top:-5px;height:32px;left:-7px
+	}
+	.timecontrol-slider .knob.lower,.timecontrol-slider .knob.upper
+	{width:11px;height:20px;border:none;background-color:transparent
+	}
+	.timecontrol-slider .knob.upper
+	{margin-top:-5px;margin-left:-1px}
+	.timecontrol-slider .knob.lower
+/*	{margin-top:-5px;margin-left:-10px}  */
+    {margin-top:-5px;margin-left:-5px}
+	.timecontrol-slider .knob.lower:after
+	{right:0;left:initial}
+	.timecontrol-slider .knob.upper:after{left:0}
+	.timecontrol-slider .knob.lower:before,.timecontrol-slider .knob.upper:before
+	{display:block;content:'';position:relative;top:2px;width:0;height:0;border-style:solid}
+	.timecontrol-slider .knob.upper:before
+/*	{border-width:16px 0 0 10px;border-color:transparent transparent transparent #a5a5a5}  */
+    {border-width: 6px 0 0 5px;border-color:transparent transparent transparent #a5a5a5} 
+	.timecontrol-slider .knob.lower:before
+/*	{border-width:0 0 16px 10px;border-color:transparent transparent #a5a5a5}   */
+    {border-width:0 0 6px 5px;border-color:transparent transparent #a5a5a5} 
+	.timecontrol-slider .dragging .knob,.timecontrol-slider .knob.leaflet-drag-target,.timecontrol-slider .slider.dragging
+	{cursor:ew-resize;cursor:grabbing;cursor:-webkit-grabbing;
+	cursor:-moz-grabbing}
+	
+	@-webkit-keyframes icon-rotation
+	{from{-webkit-transform:rotate(0);transform:rotate(0)}
+	   to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}
+    @keyframes icon-rotation
+	{from{-webkit-transform:rotate(0);transform:rotate(0)}
+	to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}
+	.timecontrol-loop.looped,.timecontrol-loop.looped:hover
+	{background-color:#ddd;color:#094f8e}
+	.timecontrol-backward:before,.timecontrol-forward:before,.timecontrol-loop:before,.timecontrol-play:before,.timecontrol-stop:before
+	{width:100%;text-align:center}
+	.timecontrol-play:before
+	{position:absolute;content:"\e072"}
+	.timecontrol-play.reverse:before
+	{content:"\e072";-ms-transform:scaleX(-1);-webkit-transform:scaleX(-1);transform:scaleX(-1)}
+	.timecontrol-play.pause:before
+	{content:"\e073"}
+	.timecontrol-play.reverse.pause:before
+	{-ms-transform:none;-webkit-transform:none;transform:none}
+	a.timecontrol-play.loading:before
+	{content:"\e031";opacity:.2;
+	 -webkit-animation:icon-rotation 6s infinite linear;
+	 animation:icon-rotation 6s infinite linear
+	 }
+	.timecontrol-date.loading:before
+	{content:"\e031";left:5px;position:absolute;
+	 -webkit-animation:icon-rotation 6s infinite linear;animation:icon-rotation 6s infinite linear
+	 }
+	.timecontrol-speed:before
+	{content:"\e141";position:absolute;left:7px}
+	.timecontrol-stop:before{content:"\e074"}
+	.timecontrol-forward:before{content:"\e075"}
+	.timecontrol-backward:before{content:"\e071"}
+	.timecontrol-loop:before{content:"\e030"}
+	
+/*	@media (max-width:767px)   
+	{  */
+	 .leaflet-bar-timecontrol.timecontrol-date, .leaflet-bar-timecontrol.timecontrol-slider
+	 {clear:both;float:none;border-right:none}
+	/*	 }  */
+	 
+	 .leaflet-touch.leaflet-bar-timecontrol.leaflet-control-timecontrol
+	 {height:30px;line-height:30px}
+	 .leaflet-touch.timecontrol-slider.slider
+	 {margin-top:10px}
+	 /* of timecontrol bar css  (this is for the properties of external timecontrol feature) */	
+ }
+
+    </style>
+</head>
+
+<!--
+<body  onload="  setInterval(function() {location.reload()}, 300000);  " >
+-->
+<body  onload="  " >
+ <script type="text/javascript">
+ 
+    /*
+     * L.Control.WMSLegend is used to add a WMS Legend to the map
+     * ref: https://github.com/kartoza/leaflet-wms-legend
+     */
+
+    L.Control.WMSLegend = L.Control.extend({
+        options: {
+            position: 'bottomright',
+            uri: ''
+        },
+
+        onAdd: function() {
+            var controlClassName = 'leaflet-control-wms-legend',
+                legendClassName = 'wms-legend',
+                stop = L.DomEvent.stopPropagation;
+            this.container = L.DomUtil.create('div', controlClassName);
+            this.img = L.DomUtil.create('img', legendClassName, this.container);
+            this.img.src = this.options.uri;
+            this.img.alt = 'Legend';
+
+            L.DomEvent
+                .on(this.img, 'click', this._click, this)
+                .on(this.container, 'click', this._click, this)
+                .on(this.img, 'mousedown', stop)
+                .on(this.img, 'dblclick', stop)
+                .on(this.img, 'click', L.DomEvent.preventDefault)
+                .on(this.img, 'click', stop);
+            this.height = null;
+            this.width = null;
+            return this.container;
+        },
+        _click: function(e) {
+            L.DomEvent.stopPropagation(e);
+            L.DomEvent.preventDefault(e);
+            // toggle legend visibility
+            var style = window.getComputedStyle(this.img);
+            if (style.display === 'none') {
+                this.container.style.height = this.height + 'px';
+                this.container.style.width = this.width + 'px';
+                this.img.style.display = this.displayStyle;
+            } else {
+                if (this.width === null && this.height === null) {
+                    // Only do inside the above check to prevent the container
+                    // growing on successive uses
+                    this.height = this.container.offsetHeight;
+                    this.width = this.container.offsetWidth;
+                }
+                this.displayStyle = this.img.style.display;
+                this.img.style.display = 'none';
+                this.container.style.height = '20px';
+                this.container.style.width = '20px';
+            }
+        },
+    });
+	
+/* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
+function openNav() {
+  document.getElementById("mySidenav").style.width = "300px";
+  document.getElementById("wms-wrapper").style.marginLeft = "300px";
+  closeDropDown();
+  update_affiche_model_et_couche();
+}
+
+/* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+  document.getElementById("wms-wrapper").style.marginLeft = "0";
+  closeDropDown();
+}
+ 
+    function remove_cmc_geomet_loop() {
+	
+	  if ( map_click_add ) { add_remove_map_click_value() } ;
+
+	  if ( existing_cmc_geomet_loop1 && update_loop1 ) { 
+	   mymap.removeLayer(cmc_geomet_loop1);  
+	   existing_cmc_geomet_loop1 = false; 
+	   document.getElementById("legende_couche1").innerHTML = "1: couche nulle";
+	  }		
+	  if ( existing_cmc_geomet_loop2 && update_loop2 ) { 
+	   mymap.removeLayer(cmc_geomet_loop2);
+	   existing_cmc_geomet_loop2 = false;
+	   document.getElementById("legende_couche2").innerHTML = "2: couche nulle";
+	  }	
+	}
+
+	function remove_cmc_geomet_loop_and_legend() {
+	
+	  if ( existing_legend_loop1 && update_loop1 ) { 	
+    ///    alert(" Effacage de la couche 1");
+	 	mymap.removeControl(wmsLegendControl1);
+		existing_legend_loop1 = false;
+		remove_cmc_geomet_loop(); 
+		layer_geomet1 = "void";
+	
+	  }	
+	  if ( existing_legend_loop2 && update_loop2 ) { 
+	 ///   alert(" Effacage de la couche 2");
+	 	mymap.removeControl(wmsLegendControl2);
+		existing_legend_loop2 = false;	
+		remove_cmc_geomet_loop(); 
+		layer_geomet2 = "void";
+	  } 
+	  closeNav();
+	}
+	function overwrite_loop1() {
+	    update_loop1 = true;
+		update_loop2 = false;
+	}
+	function overwrite_loop2() {
+	    update_loop1 = false;
+		update_loop2 = true;
+	}
+	function update_cmc_geomet_loop() {
+	    
+		remove_cmc_geomet_loop();
+	    if ( update_loop1 ) {
+		    
+			 if ( existing_cmc_geomet_loop2 && !replace_time ) { 
+	//		         opacitee = 4.;	
+                     update_TimeMode = "replace";
+			} else { 
+	//			     opacitee = 6.;
+                     update_TimeMode = "replace";
+					}
+			cmc_geomet = L.tileLayer.wms("https://geo.weather.gc.ca/geomet", {
+				layers: layer_geomet1,
+				styles: style_geomet1,  
+				format: 'image/png',
+				transparent: true,
+				opacity: parseFloat(opacitee)/10. ,
+				version: '1.3.0'
+			}).setZIndex(10);
+		cmc_geomet_loop1 = L.timeDimension.layer.wms(cmc_geomet, {
+			requestTimeFromCapabilities: true,
+			updateTimeDimension: true,
+			updateTimeDimensionMode: update_TimeMode,   
+			setDefaultTime: true,
+			period: interval_loop,
+			cacheBackward: 80,
+			cacheForward: 80,
+		});		
+		existing_cmc_geomet_loop1 = true;
+		cmc_geomet_loop1.addTo(mymap);  	
+		document.getElementById("legende_couche1").innerHTML = nom_complet_legende_couche1;	     
+		update_affiche_model_et_couche();  
+			
+		}
+
+		if ( update_loop2 ) {
+			 
+			 if ( existing_cmc_geomet_loop1 && !replace_time ) { 
+	//		         opacitee = 4. ;
+                     update_TimeMode = "replace";
+			} else { 
+	//			    opacitee = 6. ;
+                    update_TimeMode = "replace";
+					}	
+			cmc_geomet2 = L.tileLayer.wms("https://geo.weather.gc.ca/geomet", {
+				layers: layer_geomet2,
+				styles: style_geomet2,
+				format: 'image/png',
+				transparent: true,
+				opacity: parseFloat(opacitee)/10. ,
+				version: '1.3.0'
+			}).setZIndex(11);
+					
+		cmc_geomet_loop2 = L.timeDimension.layer.wms(cmc_geomet2, {
+			requestTimeFromCapabilities: true,
+			updateTimeDimension: true,	
+			updateTimeDimensionMode: update_TimeMode,   
+			setDefaultTime: true,
+			period: interval_loop,
+			cacheBackward: 80,
+			cacheForward: 80,
+		});	
+		existing_cmc_geomet_loop2 = true;
+		cmc_geomet_loop2.addTo(mymap);  
+		document.getElementById("legende_couche2").innerHTML = nom_complet_legende_couche2;
+		update_affiche_model_et_couche();
+			
+		}		
+	}
+		
+	function update_cmc_geomet_loop_and_legend() {	
+
+    	if ( update_loop1 ) { 
+	
+			if ( existing_legend_loop1 ) { 
+      			  // remove existant wms legend 
+	 				mymap.removeControl(wmsLegendControl1);
+					existing_legend_loop1 = false;
+	 		 }	
+//			alert("updating legend loop1");	 
+			// update wms legend source path
+     		   uri = "https://geo.weather.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&"
+	     	     + "layer=" + layer_geomet1 + "&format=image/png&STYLE=" + legend_style_geomet1;
+      		  wmsLegendControl1.options.uri = uri;
+			// Add WMS new legend
+     		   mymap.addControl(wmsLegendControl1);
+
+			   existing_legend_loop1 = true;
+    	 }	 
+	 	if ( update_loop2 ) {
+	 
+			 if ( existing_legend_loop2 ) { 
+	
+    		    // remove existant wms legend 
+	 			mymap.removeControl(wmsLegendControl2);
+				existing_legend_loop2 = false;
+	 		} 	 
+			// update wms legend source path
+     	   uri = "https://geo.weather.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&"
+	 	         + "layer=" + layer_geomet2 + "&format=image/png&STYLE=" + legend_style_geomet2;
+     	   wmsLegendControl2.options.uri = uri;
+			// Add WMS new legend
+     	   mymap.addControl(wmsLegendControl2);	
+	 
+	  	   existing_legend_loop2 = true;
+	 	}
+	 update_cmc_geomet_loop();
+	}
+	
+	function change_opacitee(opacitee_s) {
+		
+		var   Int_opacitee = parseInt(opacitee_s);
+		var float_opacitee = parseFloat(Int_opacitee)/10.;
+		
+			opacitee = Int_opacitee;
+//			alert( 'opacity has been changed and update is required!' );
+
+		 	if ( existing_cmc_geomet_loop1 ) {		
+				overwrite_loop1();
+				// cmc_geomet.setParams( { opacity: float_opacitee }  );
+				update_cmc_geomet_loop();
+			}
+			if ( existing_cmc_geomet_loop2 ) {
+				overwrite_loop2();
+				// cmc_geomet2.setParams( { opacity: float_opacitee }  );
+				update_cmc_geomet_loop();
+			}	 	 
+		 
+	}
+	
+	function change_couche(couche) {
+				 
+		 closeNav(); 
+		 var debut_nom_couche = "";
+		 var fin_nom_couche = "";
+
+		 if (update_loop1) {
+////			 message="couche:" + couche_id1;
+////			 alert(message);
+			 couche_id1 = couche;
+////			 message="couche:" + couche_id1;
+////			 alert(message);
+		 } 
+		 if (update_loop2) {
+			 couche_id2 = couche;
+		 } 
+
+		 if ( couche.substring(0, 4) == "PRES" ) { 
+
+				if ( model == "RDPS" ) {
+					debut_nom_couche = model + ".";
+
+				} else if ( model == "GDPS"  )  {
+					    debut_nom_couche = model + ".";
+						if ( couche.indexOf("h") != -1 ) {
+							if ( interval_loop  == "PT3H" || interval_loop  == "PT1H" ) {
+								fin_nom_couche = ".3h";
+							} else {
+								fin_nom_couche = ".6h";
+							}
+				     		if ( couche.indexOf("-CONTOUR") != -1 ) {
+						   	 couche = couche.substring(0, couche.indexOf("-CONTOUR") )  + fin_nom_couche;
+						    	fin_nom_couche = "-CONTOUR";
+							 }
+						}
+				} else if ( model == "HRDPS"  )  {
+					debut_nom_couche = model + ".CONTINENTAL.";
+				}
+				couche = couche.replace("h", "");
+
+		   } else if ( couche.substring(0, 7) == "DIAG_NW" ) {
+
+				if ( model == "RDPS" || model == "GDPS" ) {
+                    debut_nom_couche = model + ".";
+					
+				} else if ( model == "HRDPS"  )  {
+					debut_nom_couche = model + ".CONTINENTAL.";
+					alert( "selection is not available for model HRDPS");
+				}
+				if ( interval_loop  == "PT3H" || interval_loop  == "PT1H" ||
+					     interval_loop  == "PT6H" || interval_loop  == "PT12H" ||
+						 interval_loop  == "PT24H" ) {
+							fin_nom_couche = "_" + interval_loop;
+				} else {
+						    fin_nom_couche = "_PT24H"
+				}
+			} else if ( couche.substring(0, 10) == "DIAG_PTYPE" ) {
+
+				if ( model == "RDPS" || model == "GDPS" ) {
+					debut_nom_couche = model + ".";
+					
+					if ( model == "GDPS" &&
+					     (interval_loop  == "PT6H" || interval_loop  == "PT12H" ||
+					     interval_loop  == "PT24H" || interval_loop  == "PT48H")     ) {
+							couche   = couche + ".PT6H";
+				    } else {
+						    couche   = couche + ".PT3H";  
+				    }
+					        
+				} else if ( model == "HRDPS"  )  {
+					debut_nom_couche = model + ".CONTINENTAL.";
+				}
+			} else if ( couche.substring(0, 1) == "_" ) {
+
+				if (model == "RDPS" || model == "GDPS" ) {
+					debut_nom_couche = model + ".ETA";
+				} else if ( model == "HRDPS"  )  {
+					debut_nom_couche = model + ".CONTINENTAL";
+				}
+		    }
+		   
+		   couche = debut_nom_couche + couche + fin_nom_couche;
+		
+		 if (update_loop1) {
+			    layer_geomet= couche;
+			    layer_geomet1 = couche;
+			    style_geomet1 = style_geomet;
+				if ( couche.indexOf("DIAG_NW") != -1 ) {
+				
+				   if (   style_geomet1 == 'PRECIPNW') {
+					legend_style_geomet1 = 'SIGPRECIPITATIONTYPE';
+				
+				   } else if ( style_geomet1 == 'SIGPRECIPITATIONTYPE' ) {
+					    legend_style_geomet1 = 'PRECIPNW';
+					
+				   } else {
+					   message= "problème avec le style de cette couche: " + couche;
+					   alert(message);
+				   }
+				} else {
+					legend_style_geomet1 = style_geomet1;
+				}
+			    nom_legende_couche1 = model + " " + nom_legende_couche;		
+				nom_complet_legende_couche1 = "1: " + nom_legende_couche1 + "  " + style_geomet1;
+			 } 
+			 
+		 if (update_loop2) { 
+			   layer_geomet= couche;
+		       layer_geomet2 = couche;	
+			   style_geomet2 = style_geomet;
+			   if ( couche.indexOf("DIAG_NW") != -1 ) {
+				   if ( style_geomet2 = 'PRECIPNW') {
+					legend_style_geomet2 = 'SIGPRECIPITATIONTYPE';
+				   } else {
+					legend_style_geomet2 = 'PRECIPNW';
+				   }
+				} else {
+					legend_style_geomet2 = style_geomet2;
+				} 
+			   nom_legende_couche2 = model + " " + nom_legende_couche;
+			   nom_complet_legende_couche2 = "2: " + nom_legende_couche2 + "  " + style_geomet2;   
+			 } 
+		 update_cmc_geomet_loop_and_legend();  	    
+	}
+
+	function change_int_h_couche()  {
+
+		var fin_nom_couche = "";
+
+		replace_time = true;
+        
+		if ( existing_cmc_geomet_loop1 ) {
+			
+			if ( layer_geomet1.indexOf("DIAG_NW") != -1 ) {
+				if ( interval_loop  == "PT3H" || interval_loop  == "PT1H" ||
+					     interval_loop  == "PT6H" || interval_loop  == "PT12H" ||
+						 interval_loop  == "PT24H" ) {
+							fin_nom_couche = "_" + interval_loop;
+				} else {
+						    fin_nom_couche = "_PT24H"
+				}
+				layer_geomet1 = layer_geomet1.substring(0, layer_geomet1.indexOf("_PT") )  + fin_nom_couche;
+			} 
+			nom_complet_legende_couche1 = "1:_" + nom_legende_couche1 +  "  " + style_geomet1;
+			overwrite_loop1();
+			update_cmc_geomet_loop();
+		}
+		if ( existing_cmc_geomet_loop2 ) {
+
+			if ( layer_geomet1.indexOf("DIAG_NW") != -1 ) {
+				if ( interval_loop  == "PT3H" || interval_loop  == "PT1H" ||
+					     interval_loop  == "PT6H" || interval_loop  == "PT12H" ||
+						 interval_loop  == "PT24H" ) {
+							fin_nom_couche = "_" + interval_loop;
+				} else {
+						    fin_nom_couche = "_PT24H"
+				}
+				layer_geomet2 = layer_geomet2.substring(0, layer_geomet2.indexOf("_PT") )  + fin_nom_couche;
+			} 
+			
+			nom_complet_legende_couche2 = "2:_" + nom_legende_couche2 + "  " + style_geomet2;
+			overwrite_loop2();
+			update_cmc_geomet_loop();
+		}	
+	}
+	function update_affiche_model_et_couche() {
+
+		var numero_de_couche = "0";
+		
+		if ( update_loop1 )  {
+			numero_de_couche = "1";	
+		}
+		if ( update_loop2 )  {
+			numero_de_couche = "2";
+		}
+		if ( update_loop1 && update_loop2 )  {
+			numero_de_couche = "1 & 2";
+		}
+		document.getElementById("affiche model et couche").innerHTML = "Numéro de la Couche: " + numero_de_couche + " Modèle: " + model +  " Interval: " + interval_loop.replace("PT", "");
+	}
+	function update_affiche_temps() {
+
+		var tempsDeCouche = mymap.timeDimension.getCurrentTime();
+		var tempsDeCouche2 = convertir_temps_local(tempsDeCouche);
+	    document.getElementById("affiche temps").innerHTML =tempsDeCouche2;
+	}
+	function update_affiche_temps_extremes() {
+
+		var tempsExtremesDeCouche = mymap.timeDimension.getAvailableTimes();
+		var tempsIntital = tempsExtremesDeCouche[0];
+		var tempsFinal = tempsExtremesDeCouche[tempsExtremesDeCouche.length-1];
+		
+		var tempsInitial2 = convertir_temps_local(tempsIntital);
+		var tempsFinal2 = convertir_temps_local(tempsFinal);
+		document.getElementById("affiche temps Initial").innerHTML =tempsInitial2;
+		document.getElementById("affiche temps Final").innerHTML =tempsFinal2;
+	}
+
+	function update_model_name() {
+
+		var numero_de_couche = "0";
+		
+		if ( update_loop1 )  {
+			numero_de_couche = "1";
+			if (existing_cmc_geomet_loop1) {change_couche(couche_id1)} ;	
+		}
+		if ( update_loop2 )  {
+			numero_de_couche = "2";
+			if (existing_cmc_geomet_loop2) {change_couche(couche_id2)} ;
+		}
+		if ( update_loop1 && update_loop2 )  {
+			numero_de_couche = "1 & 2";
+			if (existing_cmc_geomet_loop1) {
+				overwrite_loop1();
+				change_couche(couche_id1) ;
+		    }
+			if (existing_cmc_geomet_loop2) {
+				overwrite_loop2();
+				change_couche(couche_id2);
+			}
+		}
+	}
+
+	function change_limite_domaine(domaine) {
+	
+		if ( domaine == "Globe") {
+			southWestBound = L.latLng(-90., -180.);
+	  		northEastBound = L.latLng(90., 180.);
+			  
+		} else if ( domaine == "NoHem") {
+	    	southWestBound = L.latLng(0., -180.);
+			  northEastBound = L.latLng(70., 180.);
+
+		} else if ( domaine == "Euro") {
+	    	southWestBound = L.latLng(35,-15.);
+			  northEastBound = L.latLng(60., 35.);
+
+		} else if ( domaine == "NoAM1") {
+	    	southWestBound = L.latLng(10., -160.);
+	  		northEastBound = L.latLng(70., -45.);
+			
+		} else if ( domaine == "NoAM2") {
+			southWestBound = L.latLng(20., -150.);
+			  northEastBound = L.latLng(65., -50.);
+
+		} else if ( domaine == "East") {	
+			southWestBound = L.latLng(10., -105.);
+			  northEastBound = L.latLng(50., -45.);
+			  
+		} else if ( domaine == "Continental") {	
+			southWestBound = L.latLng(35., -150.);
+			northEastBound = L.latLng(60., -50.);
+			  
+		} else if ( domaine == "S Québec") {	
+			southWestBound = L.latLng(36., -90.);
+			  northEastBound = L.latLng(53., -56.);
+
+		} else if ( domaine == "SW Québec") {	
+			southWestBound = L.latLng(40.5, -85.);
+			  northEastBound = L.latLng(48., -66.5);	 
+
+		} else if ( domaine == "YUL") {	
+			southWestBound = L.latLng(44., -77.);
+	  		northEastBound = L.latLng(47., -71.);	
+		}   
+		myBounds = L.latLngBounds( southWestBound, northEastBound );
+
+		if ( mymap.hasLayer(OpenGrisPale) ) {
+			message = "ok removing OpengrisPale trouvé";
+	//		alert(message);
+			mymap.removeLayer(OpenGrisPale);
+		
+		// Tile type: openstreetmap greytones
+		OpenGrisPale= L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+			attribution: 'Bases by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash;&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>  MSC Geomet on imeteo.ca by Pitou',
+			subdomains: 'abcd',
+			maxZoom: 19,
+			});
+
+		OpenGrisPale.addTo(mymap);
+
+		}
+		if ( mymap.hasLayer(OpenGrisPlusFonce) ) {
+			message = "ok removing OpengrisPlusfonce trouvé";
+///			alert(message);
+			mymap.removeLayer(OpenGrisPlusFonce);
+		
+		// Tile type: openstreetmap toner-lite
+		OpenGrisPlusFonce= L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+		attribution: 'Bases by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash;&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Overlay MSC Geomet on imeteo.ca by Pitou',
+		minZoom: 0,
+		maxZoom: 20,
+		ext: 'png',
+		});
+
+		OpenGrisPlusFonce.addTo(mymap); 
+		}
+
+		if ( mymap.hasLayer(Opendebase) ) {
+			message = "ok removing Opende base trouvé";
+	////		alert(message);
+			mymap.removeLayer(Opendebase);
+		// Tile type: openstreetmap
+	    Opendebase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        	attribution: 'Bases: &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> Overlay MSC Geomet on imeteo.ca by Pitou'
+    	 });  
+
+		 Opendebase.addTo(mymap);
+		}
+
+		if ( mymap.hasLayer(OpenTopoMap) ) {
+			message = "ok removing OpenTopoMap trouvé";
+	////		alert(message);
+			mymap.removeLayer(OpenTopoMap);
+		// Tile type: openstreetmap topo
+	 	OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+		maxZoom: 17,
+		attribution: 'Bases: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>) Overlay MSC Geomet on imeteo.ca by Pitou'
+		});
+
+		OpenTopoMap.addTo(mymap);
+		}
+	  
+	 	if ( existing_cmc_geomet_loop1 ) {		
+				overwrite_loop1();
+				// cmc_geomet.setParams( { opacity: float_opacitee }  );
+				update_cmc_geomet_loop();
+		}
+		if ( existing_cmc_geomet_loop2 ) {
+				overwrite_loop2();
+				// cmc_geomet2.setParams( { opacity: float_opacitee }  );
+				update_cmc_geomet_loop();
+		}	 
+		
+	//	mymap.setMaxBounds(myBounds);
+		mymap.fitBounds(myBounds);	
+	 
+	}
+
+	function closeDropDown()  {
+		var dropdown = document.getElementsByClassName("dropdown-content");
+
+		for (var i = 0; i < dropdown.length; i++) {
+			dropdown[i].style.display = "none";
+		}
+	}  
+	
+	function convertir_temps(s) {
+    return new Date(s).toISOString().slice(0,19)+'Z';
+    }
+	function convertir_temps_local(s) {
+    return new Date(s).toString().slice(0,18)+'h';
+    }
+
+  	function onMapClick(e) {
+ /* 		  popup
+      		  .setLatLng(e.latlng)
+      		  .setContent( e.latlng.toString())
+			  .openOn(mymap);  */
+	/*		  https://gis.stackexchange.com/questions/221172/popups-in-leaflet-through-geoserver-wms-active-layers-only */	  
+
+			  var latlngStr = '(' + e.latlng.lat.toFixed(3) + ', ' + e.latlng.lng.toFixed(3) + ')';
+			  var BBOX = mymap.getBounds()._southWest.lat+", "+mymap.getBounds()._southWest.lng+
+			         ","+mymap.getBounds()._northEast.lat +","+mymap.getBounds()._northEast.lng;
+
+	///		message = "BBOX: " + BBOX;
+
+			var WIDTH= mymap.getSize().x;
+			var HEIGHT = mymap.getSize().y;
+	 ///    	message = message + " WIDTH:" + WIDTH + " HEIGHT:" + HEIGHT;
+			var I = mymap.layerPointToContainerPoint(e.layerPoint).x;
+			var J = mymap.layerPointToContainerPoint(e.layerPoint).y;
+	///		message = message + " I: " + I + " J:" + J;
+	///		message = message + " e latlon: " + latlngStr;
+	///    	alert(message);
+
+			var ratiolat = (mymap.getBounds()._northEast.lat - e.latlng.lat ) / ( mymap.getBounds()._northEast.lat - mymap.getBounds()._southWest.lat );
+			var ratiolng = (mymap.getBounds()._southWest.lng - e.latlng.lng ) / (  mymap.getBounds()._southWest.lng -mymap.getBounds()._northEast.lng );
+			var oldI = I;
+			var oldJ = J;
+			I = WIDTH * ratiolng;
+			J = HEIGHT * ratiolat;
+			var deltaI = I - oldI;
+	    	var deltaJ = J - oldJ;
+	///		message = " I: " + I + " old I:" + oldI + "delta I:" + deltaI + " J:" + J + " old J:" + oldJ + "delta J:" + deltaJ;
+	///	    alert(message);
+		
+			var tempsDeCouche = mymap.timeDimension.getCurrentTime();
+			var tempsDeCouche2 = convertir_temps(tempsDeCouche);
+
+			var tempsDeCouchePlus24 =  tempsDeCouche + 24.*3600.*1000.;
+			var tempsDeCouchePlus242 = convertir_temps(tempsDeCouchePlus24); 
+	///		var tempsDeCoucheRequis = tempsDeCouche2 + "/" + tempsDeCouchePlus242 + "/" + interval_loop;
+
+	        var tempsDeCoucheRequis = tempsDeCouche2
+	///		message = "Temps requis:" +  tempsDeCoucheRequis;
+	///		alert(message);
+
+			var layer_click = layer_geomet1;
+			var style_click = style_geomet1;
+			if (map_click_value2) {
+				layer_click = layer_geomet2;
+				style_click = style_geomet2;
+			}
+			var URL = URL_geomet+
+					  '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS='+layer_click+
+					  '&QUERY_LAYERS='+layer_click+'&STYLES='+style_click+'&BBOX='+BBOX+
+					  '&FEATURE_COUNT=1&HEIGHT='+HEIGHT+'&WIDTH='+WIDTH+
+					  '&FORMAT=image%2Fpng&CRS=EPSG%3A4326&I='+I+'&J='+J+
+					  '&TIME='+tempsDeCoucheRequis;
+			popup.setLatLng(e.latlng);
+			popup.setContent("<iframe src='"+URL+"' max-width='200' max-height='300' frameborder='0'></iframe>");
+			mymap.openPopup(popup);	  
+	}
+	
+	function add_remove_map_click_value() {
+
+            if ( map_click_add) {
+				map_click_add = false;
+				
+			} else {
+				map_click_add = true;
+			}
+			if ( !map_click_add && (map_click_value1 || map_click_value2) ) {
+
+				map_click_value1 = false;
+				map_click_value2 = false;
+				mymap.removeEventListener('click', onMapClick);
+				mymap.closePopup(popup);
+				document.getElementById("mapid").style.cursor = "move";
+				document.getElementById("click_map_value").innerHTML = icone_click_map_value_off;
+
+			} else if ( map_click_add ) {
+
+				if ( existing_cmc_geomet_loop1 && !map_click_value1 ) {
+					if ( map_click_value2 ) {
+						map_click_value2 = false;
+						mymap.removeEventListener('click', onMapClick);
+					}
+					map_click_value1 = true;
+				    mymap.addEventListener('click', onMapClick);
+					document.getElementById("mapid").style.cursor = "auto";
+					document.getElementById("click_map_value").innerHTML = icone_click_map_value_on;
+				} else if (  existing_cmc_geomet_loop2 && !map_click_value2 ) {
+					if ( map_click_value1 ) {
+						map_click_value1 = false;
+						mymap.removeEventListener('click', onMapClick);
+					}
+					map_click_value2 = true;
+				    mymap.addEventListener('click', onMapClick);
+					document.getElementById("mapid").style.cursor = "auto";	
+					document.getElementById("click_map_value").innerHTML = icone_click_map_value_on;
+				}	
+			}
+	}
+
+
+/*  	http://apps.socib.es/Leaflet.TimeDimension/examples/example13.html  */
+			  
+</script>
+
+<div id="wms-wrapper">
+
+	<ul id="mySidenav" class="sidenav">
+		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+		<li class="dropdown">
+			<p id="affiche model et couche" class="affiche_model_et_couche"> </p>
+		</li>
+		<li class="dropdown">
+			<button class="dropbtn">Inst PCPN types<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content" id="menuItem1">
+				<a onclick="style_geomet='INSTPRECIPITATIONTYPE';nom_legende_couche='Inst. PCPN Type';change_couche('DIAG_PTYPE');"> Style INSTPRECIPITATIONTYPE </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">cumul PCPN types int:<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content" id="menuItem1">
+				<a onclick="style_geomet='PRECIPNW';nom_legende_couche='cumul PCPN Type';change_couche('DIAG_NW');"> Style PRECIPNW </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">cumul Snowfall<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='PRECIPSNOW';nom_legende_couche='cumul water equivalent snowfall [mm]';change_couche('_SN');"> Style PRECIPSNOW </a>
+				<a onclick="style_geomet='PRECIPSNOW-LINEAR';nom_legende_couche='cumul water equivalent snowfall [mm]';change_couche('_SN');"> Style PRECIPSNOW-LINEAR </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">cumul Rainfall<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='RDPA-WXO';nom_legende_couche='cumul rainfall [mm]';change_couche('_RN');"> Style RDPA-WXO </a>
+				<a onclick="style_geomet='PRECIPMM';nom_legende_couche='cumul rainfall [mm]';change_couche('_RN');"> Style PRECIPMM </a>
+				<a onclick="style_geomet='PRECIPMM-LINEAR';nom_legende_couche='cumul rainfall [mm]';change_couche('_RN');"> Style PRECIPMM-LINEAR </a>
+				<a onclick="style_geomet='CAPA24';nom_legende_couche='cumul rainfall [mm]';change_couche('_RN');"> Style CAPA24 </a>
+				<a onclick="style_geomet='CAPA24-LINEAR';nom_legende_couche='cumul rainfall [mm]';change_couche('_RN');"> Style CAPA24-LINEAR </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">cumul Freezing Rainfall<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='RDPA-WXO';nom_legende_couche='cumul Freezing rainfall [mm]';change_couche('_FR');"> Style RDPA-WXO </a>
+				<a onclick="style_geomet='PRECIPMM';nom_legende_couche='cumul Freezing rainfall [mm]';change_couche('_FR');"> Style PRECIPMM </a>
+				<a onclick="style_geomet='PRECIPMM-LINEAR';nom_legende_couche='cumul Freezing rainfall [mm]';change_couche('_FR');"> Style PRECIPMM-LINEAR </a>
+				<a onclick="style_geomet='CAPA24';nom_legende_couche='cumul Freezing rainfall [mm]';change_couche('_FR');"> Style CAPA24 </a>
+				<a onclick="style_geomet='CAPA24-LINEAR';nom_legende_couche='cumul Freezing rainfall [mm]';change_couche('_FR');"> Style CAPA-LINEAR </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">Total clouds-nuages<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='CLOUD';nom_legende_couche='nuage-cloud total';change_couche('_NT');"> Style CLOUD </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn"> Humid. Relat 700mb [%]<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='HUMIDITYREL';nom_legende_couche='Humid Relat 700mb [%]';change_couche('PRES_HR.700h');"> Style HUMIDITYREL </a>
+				<a onclick="style_geomet='HUMIDITYREL-LINEAR';nom_legende_couche='Humid Relat 700mb [%]';change_couche('PRES_HR.700h');"> Style HUMIDITYREL-LINEAR </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">MSLP-PNM<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='PRESSURE4_LINE';nom_legende_couche='MSLP-PNM';change_couche('_PN');"> Style PRESSURE4_LINE </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">Vent-vent SFC<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='WINDSPEEDKNOTS';nom_legende_couche='Vent-Wind sfc';change_couche('_WSPD');"> Style WINDSPEEDKNOTS </a>
+				<a onclick="style_geomet='WINDSPEEDKNOTS-LINEAR';nom_legende_couche='Vent-Wind sfc';change_couche('_WSPD');"> Style WINDSPEEDKNOTS-LINEAR </a>
+				<a onclick="style_geomet='WINDSPEEDKMH';nom_legende_couche='Vent-Wind sfc';change_couche('_WSPD');"> Style WINDSPEEDKMH </a>
+				<a onclick="style_geomet='WINDSPEEDKMH-LINEAR';nom_legende_couche='Vent-Wind sfc';change_couche('_WSPD');"> Style WINDSPEEDKMH-LINEAR </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">wind-vent vecteur surface<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='WINDARROW';nom_legende_couche='vect. Vent-Wind sfc';change_couche('_UU');"> Style WINDARROW </a>			
+				<a onclick="style_geomet='WINDARROWKMH';nom_legende_couche='vect. Vent-Wind sfc';change_couche('_UU');"> Style WINDARROWKMH </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">Temperature sfc<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='TEMPERATURE';nom_legende_couche='Temp sfc';change_couche('_TT');"> Style TEMPERATURE </a>
+				<a onclick="style_geomet='TEMPERATURE-LINEAR';nom_legende_couche='Temp sfc';change_couche('_TT');"> Style TEMPERATURE-LINEAR </a>
+				<a onclick="style_geomet='TEMPSUMMER';nom_legende_couche='Temp sfc';change_couche('_TT');"> Style TEMPSUMMER </a>
+				<a onclick="style_geomet='TEMPSUMMER-LINEAR';nom_legende_couche='Temp sfc';change_couche('_TT');"> Style TEMPSUMMER-LINEAR </a>
+				<a onclick="style_geomet='TEMPWINTER';nom_legende_couche='Temp sfc';change_couche('_TT');"> Style TEMPWINTER </a>
+				<a onclick="style_geomet='TEMPWINTER-LINEAR';nom_legende_couche='Temp sfc';change_couche('_TT');"> Style TEMPWINTER-LINEAR </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">Temperature 850mb<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='TEMPERATURE';nom_legende_couche='Temp 850mb';change_couche('PRES_TT.850');"> Style TEMPERATURE </a>
+				<a onclick="style_geomet='TEMPERATURE-LINEAR';nom_legende_couche='Temp 850mb';change_couche('PRES_TT.850');"> Style TEMPERATURE-LINEAR </a>
+				<a onclick="style_geomet='TEMP_1015_600';nom_legende_couche='Temp 850mb';change_couche('PRES_TT.850');"> Style TEMP_1015_600 </a>
+				<a onclick="style_geomet='TEMP_1015_600-LINEAR';nom_legende_couche='Temp 850mb';change_couche('PRES_TT.850');"> Style TEMP_1015_600-LINEAR </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">Vents-winds 850mb<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='WINDSPEEDKNOTS';nom_legende_couche='Vent-Wind 850mb';change_couche('PRES_WSPD.850');"> Style WINDSPEEDKNOTS </a>
+				<a onclick="style_geomet='WINDSPEEDKNOTS-LINEAR';nom_legende_couche='Vent-Wind 850mb';change_couche('PRES_WSPD.850');"> Style WINDSPEEDKNOTS-LINEAR </a>
+				<a onclick="style_geomet='WINDSPEEDKMH';nom_legende_couche='Vent-Wind 850mb';change_couche('PRES_WSPD.850');"> Style WINDSPEEDKMH </a>
+				<a onclick="style_geomet='WINDSPEEDKMH-LINEAR';nom_legende_couche='Vent-Wind 850mb';change_couche('PRES_WSPD.850');"> Style WINDSPEEDKMH-LINEAR </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">Vents-winds vector 850mb<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='WINDARROW';nom_legende_couche='vect. Vent-Wind 850mb';change_couche('PRES_UU.850');"> Style WINDARROW </a>			
+				<a onclick="style_geomet='WINDARROWKMH';nom_legende_couche='vect. Vent-Wind 850mb';change_couche('PRES_UU.850');"> Style WINDARROWKMH </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">Vents-winds 250mb<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='WINDSPEEDKNOTS';nom_legende_couche='Vent-Wind 250mb';change_couche('PRES_WSPD.250h');"> Style WINDSPEEDKNOTS </a>
+				<a onclick="style_geomet='WINDSPEEDKNOTS-LINEAR';nom_legende_couche='Vent-Wind 250mb';change_couche('PRES_WSPD.250h');"> Style WINDSPEEDKNOTS-LINEAR </a>
+				<a onclick="style_geomet='WINDSPEEDKMH';nom_legende_couche='Vent-Wind 250mb';change_couche('PRES_WSPD.250h');"> Style WINDSPEEDKMH </a>
+				<a onclick="style_geomet='WINDSPEEDKMH-LINEAR';nom_legende_couche='Vent-Wind 250mb';change_couche('PRES_WSPD.250h');"> Style WINDSPEEDKMH-LINEAR </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">Vents-winds vector 250mb<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='WINDARROW';nom_legende_couche='vect. Vent-Wind 250mb';change_couche('PRES_UU.250h');"> Style WINDARROW </a>			
+				<a onclick="style_geomet='WINDARROWKMH';nom_legende_couche='vect. Vent-Wind 250mb';change_couche('PRES_UU.250h');"> Style WINDARROWKMH </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">Vortex 500mb<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='ABSOLUTEVORTICITY';nom_legende_couche='Voticit 500mb';change_couche('PRES_QQ.500h');"> Style ABSOLUTEVORTICITY </a>			
+				<a onclick="style_geomet='ABSOLUTEVORTICITY-LINEAR';nom_legende_couche='Vorticit 500mb';change_couche('PRES_QQ.500h');"> Style ABSOLUTEVORTICITY-LINEAR </a>
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn"> GZ 500mb<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='GEOPOTENTIALHEIGHT_LINE';nom_legende_couche='GZ 500mb';change_couche('PRES_GZ.500-CONTOUR');"> Style GEOPOTENTIALHEIGHT_LINE </a>	
+				<a onclick="style_geomet='GEOPOTENTIALHEIGHT-500mb';nom_legende_couche='GZ 500mb';change_couche('PRES_GZ.500');"> Style GEOPOTENTIALHEIGHT-500mb </a>	
+				<a onclick="style_geomet='GEOPOTENTIALHEIGHT-500mb-LINEAR';nom_legende_couche='GZ 500mb';change_couche('PRES_GZ.500');"> Style GEOPOTENTIALHEIGHT-500mb-LINEAR </a>	
+			</div>
+		  </li> 
+		  <li class="dropdown">
+			<button class="dropbtn">sfc albedo<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='ALBEDO';nom_legende_couche='Albedo sfc';change_couche('_AL');"> Style ALBEDO </a>
+				<a onclick="style_geomet='ALBEDO-LINEAR';nom_legende_couche='Albedo sfc';change_couche('_AL');"> Style ALBEDO-LINEAR </a>
+			</div>
+		</li> 
+		<li class="dropdown">
+			<button class="dropbtn">Snowpack - neige au sol<i class="fa fa-caret-down"></i></button>
+			<div class="dropdown-content">
+				<a onclick="style_geomet='SNOWDEPTH';nom_legende_couche='Snowpack sfc-neige au sol';change_couche('_SD');"> Style SNOWDEPTH </a>
+				<a onclick="style_geomet='SNOWDEPTH-LINEAR';nom_legende_couche='Snowpack sfc-neige au sol';change_couche('_SD');"> Style SNOWDEPTH-LINEAR </a>
+			</div>
+		</li>
+				
+		<li class="dropdown">
+			<a href="https://imeteo.ca/html_methot/hrdps.html" class="other_item_in_dropdown"> HTTP page HDPS  </a>
+		</li>
+		<li class="dropdown">
+			<a href="https://imeteo.ca/html_methot/rdps.html" class="other_item_in_dropdown"> HTTP page RDPS  </a>
+		</li>
+		<li class="dropdown">
+			<a href="https://imeteo.ca/html_methot/gdps.html" class="other_item_in_dropdown"> HTTP page GDPS  </a>
+		</li>
+	</ul>
+
+    <!-- Add all page content inside this div if you want the side nav to push page content to the right (not used if you only want the sidenav to sit on top of the page -->
+	<!-- the following  element to display text legend and to open the sidenav -->
+	
+	<div id="menu-wms-wrapper">
+				<span class="span_menu_wms" onclick="overwrite_loop1();openNav();">&#9776;<p id="legende_couche1" class="menu-wms"> </p> </span>
+				<span class="span_menu_wms" onclick="overwrite_loop1();remove_cmc_geomet_loop_and_legend();"><p class="fa">&#xf061;&#xf014;</p></span>
+				<span class="span_menu_wms" onclick="overwrite_loop2();openNav();">&#9776;<p id="legende_couche2" class="menu-wms"> </p> </span>
+				<span class="span_menu_wms" onclick="overwrite_loop2();remove_cmc_geomet_loop_and_legend();"><p class="fa">&#xf061;&#xf014;</p></span>			
+<!--
+	/////onchange="layer.setParams({styles: this.value});"
+	        <span class="span_menu_wms">  <p> Style couche 1</p>
+				<select id="styles" class="menu-wms" onchange="style_geomet=this.value;change_couche(layer_geomet);">
+					<option selected="selected"  value="PRECIPNW"> PRECIPNW </option>
+					<option                      value="SIGPRECIPITATIONTYPE">SIGPRECIPITATIONTYPE</option>
+					<option                      value="TEMPERATURE">TEMPERATURE </option>
+					<option                      value="TEMPERATURE-LINEAR">TEMPERATURE-LINEAR</option>
+				</select>       
+			</span>
+-->
+			<span class="span_menu_wms">  <p> Modèle </p>
+				<select id="styles" class="menu-wms" onchange="model=this.value;update_model_name();">
+					<option                      value="HRDPS">HRDPS</option>
+					<option selected="selected"  value="RDPS">RDPS</option>
+					<option                      value="GDPS">GDPS</option>
+				</select> 
+			</span>
+			<span class="span_menu_wms">  <p> Zooms prédéfinis </p>
+				<select id="styles" class="menu-wms" onchange="change_limite_domaine(this.value);">
+					<option                      value="Globe">Globe</option>
+					<option                      value="NoHem">Hémisp N</option>
+					<option                      value="Euro">Europe</option>
+					<option                      value="NoAM1">Amérique N1</option>
+					<option                      value="NoAM2">Amérique N2</option>
+					<option                      value="East">Est</option>
+					<option                      value="Continental">Continental</option>
+					<option  selected="selected" value="S Québec">S Québec</option>
+					<option                      value="SW Québec">SW Québec</option>
+					<option                      value="YUL">Montréal</option>
+				</select>       
+			</span>
+			<span  class="span_menu_wms" onclick="add_remove_map_click_value();"> <p><i id="click_map_value" class="fa"> </i></p> </span>		    
+			<span class="span_menu_wms">  <p> Opacité</p>
+				<select id="opacité" class="menu-wms" onchange="change_opacitee(this.value);">
+					<option                      value="2">2/10</option>
+					<option                      value="4">4/10</option>
+					<option selected="selected"  value="6">6/10 </option>
+					<option                      value="8">8/10</option>
+					<option                      value="10">10/10</option>
+				</select>  
+			</span>  
+			<span class="span_menu_wms">  <p>Intervalle</p>
+				<select id="interval" class="menu-wms" onchange="interval_loop=this.value;change_int_h_couche();">
+					<option 					value='PT1H' >1h </option>
+					<option						value='PT3H' >3h </option>
+					<option selected="selected" value='PT6H' >6h </option>
+					<option 					value='PT12H' >12h </option>
+					<option 					value='PT24H' >24h </option>
+					<option 					value='PT48H' >48h </option>
+				</select>
+			</span>
+			<span class="span_menu_wms">  <p> Temps Début </p>
+			      <p id="affiche temps Initial" class="menu-wms"> </p>	
+			</span>
+			<span class="span_menu_wms">  <p> Temps Affiché</p>
+				  <p id="affiche temps" class="menu-wms"> </p>
+			</span>
+			<span class="span_menu_wms">  <p> Temps Fin</p>
+			    	<p id="affiche temps Final" class="menu-wms"> </p>	
+			</span>
+	</div>
+
+	<div id="mapid-wrapper">
+
+		<div id="mapid"> 			
+			<p><i id="click_map_value_on" class="fa">&#xf041; &#xf06e;</i></p>
+			<p><i id="click_map_value_off" class="fa">&#xf041; &#xf070;</i></p>
+		 </div> 		 
+	</div>
+</div>
+
+<script>
+
+	/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+
+	var dropdown = document.getElementsByClassName("dropbtn");
+	var i;
+
+	for (i = 0; i < dropdown.length; i++) {
+  		dropdown[i].addEventListener("click", function() {
+   				 this.classList.toggle("active");
+   				 var dropdownContent = this.nextElementSibling;
+   				 if (dropdownContent.style.display === "block") {
+    				  dropdownContent.style.display = "none";
+    				} else {
+					  closeDropDown();
+    	 			  dropdownContent.style.display = "block";
+   		            }
+  		});
+	}
+
+    var opacitee = 6;	
+
+	var			 model = "RDPS";
+	var interval_loop = 'PT6H';
+	var couche_id1 = "DIAG_PTYPE";
+	var couche_id2 = "void";
+
+	var        layer_geomet  = 'HRDPS.CONTINENTAL.DIAG_PTYPE';
+	var        layer_geomet1 = layer_geomet;
+	var 	   layer_geomet2 = 'void';
+	
+	var		   style_geomet  = 'INSTPRECIPITATIONTYPE';
+	var	       style_geomet1 = style_geomet;
+	var        style_geomet2 = "void";
+ 	var legend_style_geomet1 = style_geomet;
+
+	var nom_legende_couche = "HRDPS Inst PCPN composite";
+	var nom_legende_couche1 = nom_legende_couche;
+	var nom_legende_couche2 = "couche nulle";
+
+	if ( model == "RDPS" ) {
+		    interval_loop = 'PT6H';		
+	} else if ( model == "GDPS" ) {
+		    interval_loop = 'PT12H';
+	}
+	if ( model == "RDPS" || model == "GDPS" ) {
+			couche_id1 = "DIAG_NW";
+			layer_geomet  = model + "." + couche_id1 + "_" + interval_loop;
+			layer_geomet1 = layer_geomet;
+			layer_geomet2 = 'void';
+			
+			style_geomet  = 'PRECIPNW';
+			style_geomet1 = style_geomet;
+			style_geomet2 = "void";
+			legend_style_geomet1 = 'SIGPRECIPITATIONTYPE';
+
+			nom_legende_couche = " Cumul type PCPN";
+			nom_legende_couche1 = model + " " + nom_legende_couche;
+			nom_legende_couche2 = "couche nulle";
+	}
+
+	var nom_complet_legende_couche1 = "1:" + nom_legende_couche1 + " " + style_geomet1;
+	var nom_complet_legende_couche2 = "2:" + nom_legende_couche2 + " " + style_geomet2;
+	document.getElementById("legende_couche1").innerHTML = nom_complet_legende_couche1;
+	document.getElementById("legende_couche2").innerHTML = nom_complet_legende_couche2; 
+	
+	var existing_cmc_geomet_loop1 = true;
+	var existing_cmc_geomet_loop2 = false;
+	var existing_legend_loop1 = true;
+	var existing_legend_loop2 = false;
+	var update_loop1 = true;
+	var update_loop2 = false; 
+	
+	var mymap = L.map('mapid',
+	{  
+      fullscreenControl: true,
+      timeDimension: true,
+	  timeDimensionControl: true,
+      timeDimensionOptions:{
+        timeInterval: "PT10M/" + '2019-12-03T13:30:00Z',
+        period: interval_loop,
+      },   
+
+      timeDimensionControlOptions: {
+        autoPlay: false,
+        playerOptions: {
+            buffer: 2,
+            transitionTime: 1000,
+            loop: true,	
+			loopButton: true,
+			limitsSliders: true,
+			limitMinimumRange: 2,
+        }
+	  },
+//	crs: L.CRS.EPSG4326,
+	zoomDelta: 0.2,
+	zoomSnap: 0
+    } 
+	);   
+/*	
+	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> Overlay MSC Geomet on imeteo.ca by Pitou'
+     }).addTo(mymap);  
+	 
+	 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Data from Geomet WMS on imeteo.ca by Pitou',
+		id: 'mapbox/streets-v11'
+	}).addTo(mymap);   
+	
+*/
+           
+var     southWestBound = L.latLng(-90., -180.),
+	    northEastBound = L.latLng(90., 180.),
+	    myBounds = L.latLngBounds( southWestBound, northEastBound );
+
+
+// Tile type: openstreetmap greytones
+	var OpenGrisPale= L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+	attribution: 'Bases by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash;&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Overlay MSC Geomet on imeteo.ca by Pitou',
+	subdomains: 'abcd',
+	maxZoom: 19,
+///	crs: L.CRS.EPSG4326,
+	});
+	
+	// Tile type: openstreetmap toner-lite
+	var OpenGrisPlusFonce= L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+	attribution: 'Bases by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash;&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Overlay MSC Geomet on imeteo.ca by Pitou',
+	minZoom: 0,
+	maxZoom: 20,
+	ext: 'png',
+///	crs: L.CRS.EPSG4326,
+	});
+
+	// Tile type: openstreetmap
+	var Opendebase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+///		crs: L.CRS.EPSG4326,
+        attribution: 'Bases: &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> Overlay MSC Geomet on imeteo.ca by Pitou'
+     });  
+
+	// Tile type: openstreetmap topo
+	var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+		maxZoom: 17,
+///		crs: L.CRS.EPSG4326,
+		attribution: 'Bases: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>) Overlay MSC Geomet on imeteo.ca by Pitou'
+	});
+
+	//Base layers definition and addition
+	var allOptions = {
+		"Open streetmap Ton de gris pales": OpenGrisPale,
+		"Open streetmap Tons de gris plus foncé": OpenGrisPlusFonce,
+		"Open streetmap classique": Opendebase,
+		"Open streetmap: topo": OpenTopoMap,  
+	};
+
+	// Initialize with Openstreetmap greytones
+     OpenGrisPlusFonce.addTo(mymap);
+
+	// Add baseLayers to map as control layers
+	L.control.layers(allOptions).addTo(mymap);
+
+
+
+	    southWestBound = L.latLng(36., -90.);
+	    northEastBound = L.latLng(53., -56.);
+		myBounds = L.latLngBounds( southWestBound, northEastBound );
+
+	 var URL_geomet = "https://geo.weather.gc.ca/geomet";
+/*   Create a wms service tile layer  */
+    var cmc_geomet = L.tileLayer.wms(URL_geomet, {
+    layers: layer_geomet1,
+	styles: style_geomet1,  
+    format: 'image/png',
+    transparent: true,
+	opacity: parseFloat(opacitee/10.) ,
+	version: '1.3.0'
+///	crs: L.CRS.EPSG4326,
+    }).setZIndex(10);
+	
+	// Add WMS legend
+       // set image link	 
+    var uri = "https://geo.weather.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&"
+	          + "layer=" + layer_geomet1 + "&format=image/png&STYLE=" + legend_style_geomet1;
+	   // initialize legend
+    var wmsLegendControl1 = new L.Control.WMSLegend;
+    wmsLegendControl1.options.uri = uri;
+    mymap.addControl(wmsLegendControl1);
+	
+	var wmsLegendControl2 = new L.Control.WMSLegend;
+	  
+	/*  The following addition is to correct an apparent bug into the time format of geomet. It was found in:
+	https://gis.stackexchange.com/questions/321908/leaflet-time-series  */
+
+	L.TimeDimension.Layer.WMS.include({
+        _createLayerForTime: function(time){
+            var wmsParams = this._baseLayer.options;
+            wmsParams.time = new Date(time).toISOString().slice(0, 19)+'Z';
+            return new this._baseLayer.constructor(this._baseLayer.getURL(), wmsParams);
+        }
+      }); 
+	
+/* This component synchronizes the WMS with a TimeDimension, 
+   modifying the time parameter in the WMS requests. It creates the loop   */
+   
+    var update_TimeMode = "replace";
+	var replace_time = false;
+
+    var cmc_geomet_loop1 = L.timeDimension.layer.wms(cmc_geomet, {
+	  requestTimeFromCapabilities: true,
+	  updateTimeDimension: true,
+	  updateTimeDimensionMode: update_TimeMode,   
+ 	  setDefaultTime: true    ,   
+	  period: interval_loop,
+	  cacheBackward: 80,
+	  cacheForward: 80,
+	});
+	cmc_geomet_loop1.addTo(mymap);
+//	setInterval(function() {update_cmc_geomet_loop();}, 3600000);   
+
+// mymap.setBounds(myBounds);
+   mymap.fitBounds(myBounds);
+ //  flyToBounds(myBounds);
+ 
+ /*  https://gis.stackexchange.com/questions/221172/popups-in-leaflet-through-geoserver-wms-active-layers-only */
+ 
+  var popup = new L.popup();
+  var map_click_value1 = false;
+  var map_click_value2 = false;
+  var map_click_add = false;
+  var icone_click_map_value_off = document.getElementById("click_map_value_off").innerHTML;
+  var icone_click_map_value_on = document.getElementById("click_map_value_on").innerHTML;
+
+  document.getElementById("click_map_value").innerHTML = icone_click_map_value_off;
+  document.getElementById("mapid").style.cursor = "move";
+
+  setInterval(function() {update_affiche_temps();}, 100);
+  setInterval(function() {update_affiche_temps_extremes();}, 5000);
+  
+
+ /* overwrite_loop1();style_geomet='PRECIPNW';nom_legende_couche='cumul PCPN Type';change_couche('DIAG_NW'); */
+  
+ /*
+  var southWest_image_Bound = L.latLng(40., -90.);
+  var northEast_image_Bound = L.latLng(55., -75.);
+  var imageBounds = L.latLngBounds( southWest_image_Bound, northEast_image_Bound );
+
+  url_image = "https://geo.weather.gc.ca/geomet/?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage" +
+              "&COVERAGEID=" + "GDPS.ETA_TT" + "&SUBSETTINGCRS=EPSG:4326&SUBSET=x(-90,-75)&y(40,55)&RESOLUTION=x(0.24)&RESOLUTION=y(0.24)&FORMAT=image/tiff";
+
+  url_image = "../../geomet/geomet-weather_" + "GDPS.ETA_TT" + "_" + "2019-12-30T0000Z_PT15H" + ".png";
+   // Create map
+   
+     var firstImage = L.imageOverlay(url_image, imageBounds).setZIndex(12).setOpacity(0.6);
+
+   firstImage.addTo(mymap);
+*/
+
+/*
+"http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalvis-tsp.map&request=GetMap&service=WMS&version=1.3&FORMAT=image/png"
+ 
+http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalvis.map&request=GetCapabilities&service=WMS&version=1.3
+
+http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=global1kmvis.map&request=GetCapabilities&service=WMS&version=1.3
+http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=global1kmvisfull.map&request=GetCapabilities&service=WMS&version=1.3
+
+http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalir-avn.map&request=GetCapabilities&service=WMS&version=1.3
+http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalir.map&request=GetCapabilities&service=WMS&version=1.3
+http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalir-bd.map&request=GetCapabilities&service=WMS&version=1.3
+http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalir-ott.map&request=GetCapabilities&service=WMS&version=1.3
+
+url_image="http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalvis-tsp.map&request=GetMap&service=WMS&version=1.3&FORMAT=image/png";
+url_image="http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalir-avn.map&request=GetCapabilities&service=WMS&version=1.3";
+
+  var southWest_image_Bound = L.latLng(-90., -180.);
+  var northEast_image_Bound = L.latLng(90., 180.);
+  var imageBounds = L.latLngBounds( southWest_image_Bound, northEast_image_Bound );
+
+  var firstImage = L.imageOverlay(url_image, imageBounds).setZIndex(12).setOpacity(0.6);
+
+  firstImage.addTo(mymap);
+*/
+ /*  var URL_geomet = "http://realearth.ssec.wisc.edu/cgi-bin/mapserv?map=globalvis-tsp.map&request=GetMap&service=WMS&version=1.3&FORMAT=image/png";*/
+/*   Create a wms service tile layer  */
+/* var cmc_geomet3 = L.tileLayer.wms(URL_geomet, {
+    transparent: true,
+	opacity: parseFloat(opacitee/10.)
+///	crs: L.CRS.EPSG4326,
+    }).setZIndex(10).addTo(mymap);
+*/
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,27 @@
+.muchWorse {
+   background-color: #0571B0;
+}
+
+.worse {
+   background-color: #62A9CE;
+}
+
+.slightlyWorse {
+   background-color: #B3D5E6;
+}
+
+.similar {
+   background-color: #F7F7F7;
+}
+
+.slightlyBetter {
+   background-color: #F5C0A9;
+}
+
+.better {
+   background-color: #E66E61;
+}
+
+.muchBetter {
+   background-color: #CA0020;
+}

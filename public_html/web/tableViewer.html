@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>VAQUM - Table viewer</title>
+   <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css">
+   <link rel="stylesheet" href="vaqum.css">
+</head>
+<body class="claro">
+    <script>/*This empty script tag is essential to make Dojo's injection mechanism work properly*/</script>
+    <div id="choice"></div>
+    <br>
+    <div id="grid"></div>
+    <script>
+        dojoConfig = {
+            async: true,
+            parseOnLoad: false,
+            baseUrl: ".",
+            packages: [
+                { name: "dojo", location: "/dojo/dojo" },
+                { name: "dijit", location: "/dojo/dijit" },
+                { name: "dojox", location: "/dojo/dojox" },
+                { name: "vaqum", location: "dojo" }
+            ],
+            isDebug: true
+        };
+    </script>
+    <script src="/dojo/dojo/dojo.js"></script>
+    <script>
+        var onTableChange = function() {
+            require(["dijit/form/Select", "dojo/request", "dojo/dom", "dojo/dom-construct", "dojo/domReady!"],
+            function(Select, request, dom, domConstruct) {
+                var tableSelect = dijit.byId("tableSelect");
+                request.get('db/' + tableSelect.get('value') + '/', {
+                    handleAs: "json"
+                }).then(function(result) {
+                    var grid = dom.byId("grid");
+                    grid.innerHTML = "";
+
+                    if ( result.length > 0 ) {
+                        var table = domConstruct.create("table", null, grid);
+                        var row = domConstruct.create("tr", null, table);
+
+                        var dataRow = result[0];
+                        //domConstruct.create("th", {innerHTML: "Name"}, row);
+                        //domConstruct.create("th", {innerHTML: "Description"}, row);
+                        for ( var col in dataRow ) {
+                            domConstruct.create("th", {innerHTML: col}, row);
+                        }
+
+                        for (var i = 0; i < result.length; i++) {
+                            row = domConstruct.create("tr", null, table);
+                            dataRow = result[i];
+                            //domConstruct.create("td", {innerHTML: dataRow.name}, row);
+                            //domConstruct.create("td", {innerHTML: dataRow.description}, row);
+                            for ( var col in dataRow ) {
+                                domConstruct.create("td", {innerHTML: dataRow[col]}, row);
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        require(["dijit/form/Select", "dojo/dom", "dojo/dom-construct", "dojo/domReady!"],
+        function(Select, dom, domConstruct) {
+            var selectDiv = dom.byId("choice");
+            var label = domConstruct.create("label", {innerHTML: "Table : "}, selectDiv);
+            var tableSelect = new Select({
+                id: "tableSelect",
+                name: "tableSelect",
+                options: [
+                    { label: "Comparaisons", value: "comparison", selected: true },
+                    { label: "Exécutables", value: "executable" },
+                    { label: "Grilles", value: "grid" },
+                    { label: "Inventaires d'émissions", value: "inventory" },
+                    { label: "Modèles", value: "model" },
+                    { label: "Séries", value: "serie" },
+                    { label: "Snapshots de stations", value: "stationsnapshot" }
+                ],
+                onChange: onTableChange
+            });
+            tableSelect.placeAt(selectDiv);
+        });
+
+        onTableChange();
+    </script>
+</body>
+</html>

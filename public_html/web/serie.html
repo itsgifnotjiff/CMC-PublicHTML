@@ -1,0 +1,139 @@
+<!DOCTYPE HTML>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>VAQUM - Serie info / Info série</title>
+      <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css" media="screen">
+      <link rel="stylesheet" href="vaqum.css" media="screen">
+   </head>
+   <body class="claro">
+      <div id="info"></div>
+      <div id="map"></div>
+      <script>
+         var dojoConfig = {
+            async: true,
+            packages: [{
+               name: "vaqum",
+               location: location.pathname.replace(/[^/]*\/[^/]*\/[^/]*$/, '') + 'dojo'
+            }]
+         };
+      </script>
+      <script src="/dojo/dojo/dojo.js"></script>
+      <script src="linkifyUrls.js"></script>
+      <script>
+         require([
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dojo/io-query",
+            "dojo/hash",
+            "dojo/topic",
+            "dojo/request",
+            "dojo/domReady!"
+         ], function(dom, domConstruct, ioQuery, hash, topic, request) {
+            var infoNode = dom.byId("info");
+
+            function printSerieInfo(node, id) {
+               request.get(
+                  "rodb/serie",
+                  {
+                     handleAs: "json",
+                     query: {
+                        id: id
+                     }
+                  }
+               ).then(function(serie) {
+                  var defList = domConstruct.create("dl", null, node);
+
+                  var dtNode;
+                  var ddNode;
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Id";
+                  ddNode = domConstruct.create("dd", null, defList);
+                  ddNode.innerHTML = serie.id;
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Name";
+                  ddNode = domConstruct.create("dd", null, defList);
+                  ddNode.innerHTML = serie.name;
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Description";
+                  ddNode = domConstruct.create("dd", null, defList);
+                  var description = linkifyUrls(serie.description);
+                  ddNode.innerHTML = description.replace(/\n/g, "<br>\n");
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Grid";
+                  var gridDdNode = domConstruct.create("dd", null, defList);
+                  request.get("rodb/grid", {handleAs: "json", query: {id: serie.grid}}).then(function(grid) {
+                     gridDdNode.innerHTML = grid.name;
+                  });
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Model";
+                  var modelDdNode = domConstruct.create("dd", null, defList);
+                  request.get("rodb/model", {handleAs: "json", query: {id: serie.model}}).then(function(model) {
+                     modelDdNode.innerHTML = model.name;
+                  });
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Station Snapshot";
+                  var snapshotDdNode = domConstruct.create("dd", null, defList);
+                  request.get("rodb/stationSnapshot", {handleAs: "json", query: {id: serie.stationsnapshot}}).then(function(stationSnapshot) {
+                     snapshotDdNode.innerHTML = stationSnapshot.creationdate;
+                  });
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Current implementation";
+                  var implementationDdNode = domConstruct.create("dd", null, defList);
+                  if (serie.currentimplementation == null ) {
+                     implementationDdNode.innerHTML = "&nbsp;";
+                  } else {
+                     request.get("rodb/implementation", {handleAs: "json", query: {id: serie.currentimplementation}}).then(function(implementation) {
+                        implementationDdNode.innerHTML = implementation.name;
+                     });
+                  }
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Interpolation";
+                  var interpolationDdNode = domConstruct.create("dd", null, defList);
+                  request.get("rodb/interpolation", {handleAs: "json", query: {id: serie.interpolation}}).then(function(interpolation) {
+                     interpolationDdNode.innerHTML = interpolation.name;
+                  });
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Creation Date";
+                  ddNode = domConstruct.create("dd", null, defList);
+                  ddNode.innerHTML = serie.creationdate;
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Expiry Date";
+                  ddNode = domConstruct.create("dd", null, defList);
+                  ddNode.innerHTML = serie.expirydate;
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Creator";
+                  ddNode = domConstruct.create("dd", null, defList);
+                  ddNode.innerHTML = serie.creator;
+
+                  dtNode = domConstruct.create("dt", null, defList);
+                  dtNode.innerHTML = "Reminder Send";
+                  ddNode = domConstruct.create("dd", null, defList);
+                  ddNode.innerHTML = serie.remindersent;
+               });
+            }
+
+            function updateInfo(hash) {
+               var pageQuery = ioQuery.queryToObject(hash);
+               var serieId = pageQuery.id;
+               domConstruct.empty(infoNode);
+               printSerieInfo(infoNode, serieId);
+            }
+
+            topic.subscribe("/dojo/hashchange", updateInfo);
+            updateInfo(hash());
+         });
+      </script>
+   </body>
+</html>

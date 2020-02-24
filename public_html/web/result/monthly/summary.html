@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>VAQUM - Monthly Summary / Sommaire mensuel</title>
+      <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css" media="screen">
+      <link rel="stylesheet" href="monthly.css" type="text/css">
+      <link title="RedBlu" rel="stylesheet" href="RedBlu.css" type="text/css">
+      <link title="RdYlBu" rel="alternate stylesheet" href="RdYlBu.css" type="text/css">
+   </head>
+   <body class="claro">
+      <div id="Header">
+         <div id="Controls">
+            <label for="monthlSelect">Month : </label>
+            <div id="monthSelect" name="monthSelect"></div>
+         </div>
+          <div>
+            <label for="groupSelect">Station Groups : </label>
+            <div id="groupSelect" name="groupSelect"></div>
+         </div>
+      </div>
+      <div id="Content">
+         <div id="SummaryTable"></div>
+         <div id="Legend"></div>
+      </div>
+      <script>
+         var dojoConfig = {
+            async: true,
+            packages: [{
+               name: "vaqum",
+               location: location.pathname.replace(/[^/]*\/[^/]*\/[^/]*$/, '') + 'dojo'
+            }]
+         };
+      </script>
+      <script src="/dojo/dojo/dojo.js"></script>
+      <script>
+         require([
+            "dojo/dom",
+            "dojo/dom-construct",
+            "dojo/io-query",
+            "dojo/hash",
+            "dojo/topic",
+            "dojo/_base/lang",
+            "dojo/request",
+            "dojo/store/Memory",
+            "dijit/form/FilteringSelect",
+            "vaqum/monthlySummaryTable",
+            "dojo/domReady!"
+         ], function(dom, domConstruct, ioQuery, hash, topic, lang, request, Memory, FilteringSelect, MonthlySummaryTable) {
+            var firstLoad = true;
+
+            var pageQuery = ioQuery.queryToObject(hash());
+
+            var monthlyStatConfig = pageQuery.monthlyStatConfig;
+            var month = pageQuery.month;
+            var group = pageQuery.group;
+
+            var monthlySummaryTable = new MonthlySummaryTable(dom.byId("SummaryTable"), dom.byId("Legend"));
+
+            var monthStore = new Memory();
+            var groupStore = new Memory();
+
+            function updateTable(hash) {
+               var query = ioQuery.queryToObject(hash);
+               if ( query.monthlyStatConfig ) {
+                  monthlySummaryTable.update(query.monthlyStatConfig, query.month, query.group);
+
+                  monthSel.set('value', query.month, false);
+                  groupSel.set('value', query.group, false);
+               }
+            }
+
+            function changeSelection() {
+               if (monthlyStatConfig && month && group) {
+                  // Only load if the selection has changed from the request in the URL
+                  var requestedParams = {
+                     monthlyStatConfig: monthlyStatConfig,
+                     month: month,
+                     group: group
+                  }
+
+                  hash(ioQuery.objectToQuery(requestedParams));
+                  if (firstLoad) {
+                     // There is no publish if the hash isn't changed.  Therefore, to work on fully qualified
+                     // initial page load, we have to explicitly call updateTable
+                     updateTable(ioQuery.objectToQuery(requestedParams));
+                     firstLoad = false;
+                  }
+               }
+            }
+
+
+            function onMonthChange(newMonth) {
+               month = newMonth;
+               updateGroupLists();
+               changeSelection();
+            }
+
+            function onGroupChange(newGroup) {
+               group = newGroup;
+               changeSelection();
+            }
+
+            // update station groups available for the month
+            // TODO: Reduce code repetition between all the monthly classes/pages...this thing is copy pasted 3x
+            function updateGroupLists() {
+               request.get(
+                  "../../rodb/monthlyStatGroup",
+                  {
+                     handleAs: "json",
+                     query: {
+                        monthlyStatConfig: monthlyStatConfig,
+                        monthMin: month,
+                        monthMax: month
+                     }
+                  }
+               ).then(lang.hitch(this, function(result) {
+                  // clean up groupStore
+                  groupStore.query().forEach( function(item) {
+                     groupStore.remove(item.id);
+                  });
+                  // Add a fake "id" item to the store.  Even by setting the "idProperty"
+                  // on the store, the filtering select will not work correctly
+                  result.forEach(function (item) {
+                     let selectString = item.id + ' - ' + item.description;
+                     groupStore.add({id: item.id, group: selectString});
+                  });
+
+                  if (result.length > 0) {
+                     if (groupStore.get(group) === undefined) {
+                        group = groupStore.data[0].id;
+                     }
+                     groupSel.set('value', group);
+                  }
+                  groupSel.set('disabled', (0 == result.length));
+               }));
+            }
+
+            var monthSel = new FilteringSelect({
+               store: monthStore,
+               searchAttr: 'month',
+               style: 'width: 32em;',
+               disabled: true,
+               onChange: onMonthChange,
+               sort: [{attribute:"month",descending: true}]
+            }, "monthSelect");
+
+            var groupSel = new FilteringSelect({
+               store: groupStore,
+               searchAttr: 'group',
+               style: 'width: 20em;',
+               disabled: true,
+               onChange: onGroupChange,
+               sort: [{attribute:"group",descending: true}]
+            }, "groupSelect");
+
+            request.get(
+               "../../rodb/monthlyStatMonth",
+               {
+                  handleAs: "json",
+                  query: {
+                     monthlyStatConfig: monthlyStatConfig
+                  }
+               }
+            ).then(lang.hitch(this, function(result) {
+               // Add a fake "id" item to the store.  Even by setting the "idProperty"
+               // on the store, the filtering select will not work correctly
+               result.forEach(function (item) {
+                  monthStore.add({id: item, month: item});
+               });
+
+               if (result.length > 0) {
+                  if (month === undefined) {
+                     month = monthStore.data[0].month;
+                  }
+                  monthSel.set('value', month);
+               }
+               monthSel.set('disabled', (0 == result.length));
+            }));
+
+            topic.subscribe("/dojo/hashchange", updateTable);
+         } );
+      </script>
+   </body>
+</html>

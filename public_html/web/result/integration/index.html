@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <title>VAQUM - Integration Stats</title>
+   <link rel="stylesheet" href="/dojo/dijit/themes/claro/claro.css">
+   <link rel="stylesheet" href="../../dojo/LoadingAnimation.css">
+   <style type="text/css">
+      .integrationStatChart { height: 500px; }
+   </style>
+</head>
+
+
+<body class="claro">
+   <div id="loadingOverlay"></div>
+   <div id="form">
+      <div id="dateMinPicker"></div>
+      <div id="dateMaxPicker"></div>
+      <div id="variableSelect"></div>
+      <div id="controls">
+         <div id="loadButton"></div>
+         <label for="interactiveCheckBox">Interactive</label><div id="interactiveCheckBox"></div>
+      </div>
+   </div>
+   <div id="chart_rmse" class="integrationStatChart"></div>
+   <div id="legend_rmse"></div>
+   <div id="export_rmse"></div>
+
+   <div id="chart_mbias" class="integrationStatChart"></div>
+   <div id="legend_mbias"></div>
+   <div id="export_mbias"></div>
+
+   <div id="chart_avg" class="integrationStatChart"></div>
+   <div id="legend_avg"></div>
+   <div id="export_avg"></div>
+
+   <div id="chart_corr" class="integrationStatChart"></div>
+   <div id="legend_corr"></div>
+   <div id="export_corr"></div>
+
+   <div id="chart_urmse" class="integrationStatChart"></div>
+   <div id="legend_urmse"></div>
+   <div id="export_urmse"></div>
+
+   <script>
+   var dojoConfig = {
+      async: true,
+      packages: [{
+         name: "vaqum",
+         location: location.pathname.replace(/[^/]*\/[^/]*\/$/, '') + 'dojo'
+      }]
+   };
+   </script>
+   <script src="/dojo/dojo/dojo.js"></script>
+    <script>
+      require([
+         "dojo/request",
+         "dojo/date/stamp",
+         "dijit/form/Form",
+         "dijit/form/DateTextBox",
+         "dijit/form/FilteringSelect",
+         "dijit/form/Button",
+         "dijit/form/CheckBox",
+         "dojo/store/Memory",
+         "vaqum/IntegrationStatChart",
+         "vaqum/LoadingAnimation",
+         "dojo/domReady!"
+      ],
+      function(request, stamp, Form, DateTextBox, FilteringSelect, Button, CheckBox, Memory, IntegrationStatChart, LoadingAnimation) {
+         var loadingAnimation = new LoadingAnimation("loadingOverlay");
+
+         // Create form's elements
+         var form = new Form({}, "form");
+
+         var dateMinPicker = new DateTextBox({
+            required: true,
+            constraints: {
+               datePattern: "yyyy-MM-dd"
+            }
+         }, "dateMinPicker");
+         dateMinPicker.startup();
+
+         var dateMaxPicker = new DateTextBox({
+            required: true,
+            constraints: {
+               datePattern: "yyyy-MM-dd"
+            }
+         }, "dateMaxPicker");
+         dateMaxPicker.startup();
+
+         var variableStore = new Memory();
+         var variableSelect = new FilteringSelect({
+            store: variableStore,
+            requried: true,
+            placeHolder: "Variable",
+            style: "width: 6em;",
+            disabled: true,
+         }, "variableSelect");
+         variableSelect.startup();
+
+         var loadButton = new Button({
+            label: "Load",
+            onClick: function() {
+               loadingAnimation.load(updateCharts);
+            }
+         }, "loadButton");
+         variableSelect.startup();
+
+         var onInteractiveChange = function (interactive) {
+            charts.forEach(function(chart) {
+               chart.setInteractive(interactive);
+            });
+         };
+
+         var interactiveChk = new CheckBox({
+            name: "interactiveChk",
+            value: true,
+            checked: true,
+            onChange: onInteractiveChange
+         }, "interactiveCheckBox")
+
+         // Create charts
+         var stats = ["rmse", "mbias", "avg", "corr", "urmse"];
+         var charts = [];
+         stats.forEach(function(stat) {
+            charts.push(new IntegrationStatChart(stat));
+         });
+
+         var updateCharts = function() {
+            if (form.validate()) {
+               charts.forEach(function(chart) {
+                  chart.change(dateMinPicker.get("value"), dateMaxPicker.get("value"), variableSelect.get("value"));
+               });
+            }
+         };
+
+         var updateSeriesRegion = function() {
+            var targetURI = '../../rodb/integrationStatSeries' +
+               '?dateMin='  + encodeURIComponent(stamp.toISOString(dateMinPicker.get("value"))) +
+               '&dateMax='  + encodeURIComponent(stamp.toISOString(dateMaxPicker.get("value"))) +
+               '&variable=' + variableSelect.get("value");
+            request.get(targetURI, {
+               handleAs:"json"
+            }).then(function(series) {
+               regionSerieStore.setData(series);
+               if ( series.length === 0 ) {
+                  regionSerieSelect.set("disabled", true);
+               } else {
+                  regionSerieSelect.set("disabled", false);
+               }
+            });
+         }
+
+         var updateVars = function() {
+            var targetURI = '../../rodb/integrationStatVariables' +
+               '?dateMin=' + encodeURIComponent(stamp.toISOString(dateMinPicker.get("value"))) +
+               '&dateMax=' + encodeURIComponent(stamp.toISOString(dateMaxPicker.get("value")));
+            request.get(targetURI, {
+               handleAs:"json"
+            }).then(function(variables) {
+               variableStore.setData(variables);
+               if ( variables.length === 0 ) {
+                  variableSelect.set("disabled", true);
+               } else {
+                  variableSelect.set("value", variables[0].id);
+                  variableSelect.set("disabled", false);
+               }
+            });
+         }
+
+
+         request.get("../../rodb/integrationStatDates", {
+            handleAs:"json"
+         }).then(function(dates) {
+            // The constructor Date() does not accept dates[0].min date format
+            var minStr = dates[0].min.split(/-|\s|:|\+/);
+            var maxStr = dates[0].max.split(/-|\s|:|\+/);
+
+            // arr[1] - 1 : The first month start to 0
+            var dateMin = new Date(minStr[0], minStr[1] -1 , minStr[2]);
+            var dateMax = new Date(maxStr[0], maxStr[1] -1 , maxStr[2]);
+
+            dateMinPicker.constraints.min = dateMin;
+            dateMinPicker.constraints.max = dateMax;
+            var previousMonth = new Date(dateMax.getFullYear(), dateMax.getMonth() -1, dateMax.getDate());
+            dateMinPicker.set("value", previousMonth);
+
+            dateMaxPicker.constraints.min = dateMin;
+            dateMaxPicker.constraints.max = dateMax;
+            dateMaxPicker.set("value", dateMax);
+         });
+
+
+         dateMinPicker.on("change", function() {
+            dateMaxPicker.constraints.min = dateMinPicker.get("value");
+            updateVars();
+         });
+
+         dateMaxPicker.on("change", function() {
+            dateMinPicker.constraints.max = dateMaxPicker.get("value");
+            updateVars();
+         });
+
+//          loadButton.onClick();
+      });
+   </script>
+</body>
+</html>
